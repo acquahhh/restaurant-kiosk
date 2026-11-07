@@ -1,0 +1,120 @@
+@import "tailwindcss";
+
+/* =============================================================================
+   Design tokens
+   One type family (Bricolage Grotesque), a small warm palette, and spacing
+   sized for fingers, not cursors. Everything in the app derives from these.
+   ============================================================================= */
+@theme {
+  /* Type */
+  --font-sans: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+
+  /* Palette */
+  --color-ink: #1c1b18;           /* text */
+  --color-ink-muted: #6b665c;     /* secondary text */
+  --color-canvas: #ffffff;        /* page */
+  --color-sand: #f4efe4;          /* secondary surfaces, rails, panels */
+  --color-sand-deep: #e6dfcf;     /* borders, dividers, pressed sand */
+  --color-palm: #16603a;          /* primary action, selected state */
+  --color-palm-deep: #0f4a2c;     /* primary pressed */
+  --color-palm-soft: #e3efe7;     /* selected background */
+  --color-plantain: #f2b134;      /* the one hero button per screen */
+  --color-plantain-deep: #d99a1f;
+  --color-pepper: #b3261e;        /* destructive, errors */
+  --color-pepper-soft: #f9e5e3;
+
+  /* Kitchen display (dark, glanceable) */
+  --color-slate: #14181d;
+  --color-slate-raised: #1e242b;
+  --color-slate-line: #2c343d;
+  --color-status-new: #f2b134;
+  --color-status-preparing: #4f8ef7;
+  --color-status-ready: #2fbf71;
+  --color-status-done: #7d8794;
+
+  /* Radii: hierarchy, not one radius everywhere */
+  --radius-button: 14px;
+  --radius-card: 20px;
+  --radius-panel: 28px;
+
+  /* Touch sizing */
+  --spacing-touch: 64px;          /* minimum height of any kiosk target */
+  --spacing-touch-lg: 88px;       /* primary kiosk buttons */
+
+  /* Motion */
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --duration-fast: 140ms;
+  --duration-base: 220ms;
+}
+
+/* Type scale (Elements of Typographic Style ratios, tuned for a 1080p kiosk
+   read from ~60cm). Body on the kiosk is 20px, not 16px. */
+@layer base {
+  :root {
+    --text-kiosk-body: 1.25rem;        /* 20px */
+    --text-kiosk-title: 1.75rem;       /* 28px */
+    --text-kiosk-heading: 2.5rem;      /* 40px */
+    --text-kiosk-display: 4.5rem;      /* 72px */
+    --text-kiosk-price: 1.875rem;      /* 30px, heavy */
+  }
+
+  html {
+    font-family: var(--font-sans);
+    color: var(--color-ink);
+    background: var(--color-canvas);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100dvh;
+  }
+
+  /* Kiosk screens: no text selection, no overscroll bounce, no long-press menus */
+  [data-surface="kiosk"] {
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    overscroll-behavior: none;
+    touch-action: manipulation;
+    font-size: var(--text-kiosk-body);
+    cursor: default;
+  }
+
+  [data-surface="kitchen"] {
+    background: var(--color-slate);
+    color: #f3f4f6;
+  }
+
+  button {
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--color-palm);
+    outline-offset: 3px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+/* Reusable composition utilities */
+@utility touch-target {
+  min-height: var(--spacing-touch);
+  min-width: var(--spacing-touch);
+}
+
+@utility price {
+  font-size: var(--text-kiosk-price);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
