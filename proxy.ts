@@ -15,7 +15,7 @@ const ACCESS: Array<{ prefix: string; roles: UserRole[] }> = [
   { prefix: "/admin", roles: ["manager", "admin"] },
 ];
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const rule = ACCESS.find((r) => request.nextUrl.pathname.startsWith(r.prefix));
   if (!rule) return NextResponse.next();
 
