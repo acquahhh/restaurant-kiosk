@@ -3,7 +3,9 @@
 Self-service kiosk, kitchen display and admin dashboard for a restaurant in Ghana.
 Next.js 15 · TypeScript · Tailwind v4 · Supabase · Paystack.
 
-See `docs/PHASE-1-ARCHITECTURE.md` for the architecture, data model and design direction.
+See `docs/PHASE-1-ARCHITECTURE.md` for the architecture, data model and design direction, and `docs/SETUP-SUPABASE.md` to connect the database.
+
+Without Supabase keys, `npm run dev` runs the kiosk on a built-in development menu (a badge says so) and ordering is disabled.
 
 ## Local setup
 
@@ -31,6 +33,8 @@ To test the schema on plain PostgreSQL without Supabase:
 createdb kiosk_test
 psql -d kiosk_test -f supabase/tests/local_shim.sql
 psql -d kiosk_test -f supabase/migrations/0001_initial_schema.sql
+psql -d kiosk_test -f supabase/migrations/0002_place_order.sql
 psql -d kiosk_test -f supabase/seed.sql
 psql -d kiosk_test -f supabase/tests/smoke_test.sql
+psql -d kiosk_test -f supabase/tests/place_order_test.sql
 ```

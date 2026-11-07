@@ -1,29 +1,73 @@
 "use server";
 
+import { createAdminClient } from "@/lib/supabase/admin";
+import { isServerWriteConfigured } from "@/lib/supabase/config";
 import { placeOrderSchema, type PlaceOrderResult } from "@/lib/kiosk/order-input";
 
+/** Turns database error codes from place_order() into words for customers. */
+type FailureCode = Extract<PlaceOrderResult, { ok: false }>["code"];
+
+function explain(dbMessage: string): { code: FailureCode; message: string } {
+  const [code, detail] = dbMessage.split(/:(.*)/s).map((s) => s?.trim());
+  switch (code) {
+    case "ITEM_UNAVAILABLE":
+      return { code: "unavailable", message: `Sorry, ${detail} has just sold out. Remove it from your order to continue.` };
+    case "OPTION_UNAVAILABLE":
+      return { code: "unavailable", message: `Sorry, ${detail} is no longer available. Change that meal to continue.` };
+    case "ITEM_INVALID":
+    case "OPTION_INVALID":
+      return { code: "unavailable", message: "The menu has changed since you started. Please review your order." };
+    case "OPTION_REQUIRED":
+      return { code: "invalid", message: `Please complete your choices for ${detail}.` };
+    case "TABLE_INVALID":
+      return { code: "invalid", message: "That table number is not in use. Please choose your table again." };
+    case "NAME_REQUIRED":
+      return { code: "invalid", message: "Please enter your name for the takeaway order." };
+    case "METHOD_DISABLED":
+      return { code: "invalid", message: "That payment method is not available right now. Please choose another." };
+    case "EMPTY_ORDER":
+      return { code: "invalid", message: "Your order is empty." };
+    default:
+      return { code: "server_error", message: "Your order could not be placed. Please try again or ask a member of staff." };
+  }
+}
+
 /**
- * Places a kiosk order.
+ * Places a kiosk order through public.place_order(), which reprices and
+ * validates everything inside one database transaction.
  *
- * PHASE 2 STATUS: input validation is real; persistence is not built yet.
- * Phase 3 replaces the final return with: reprice from the database, insert
- * the order + items + customizations in one transaction keyed by
- * idempotencyKey, and return the real order number. Until then this always
- * reports that ordering is not connected. It never pretends to succeed.
+ * Mobile Money and card stop here until Phase 6 connects Paystack: an order
+ * that cannot be paid for must not be created.
  */
 export async function placeOrder(raw: unknown): Promise<PlaceOrderResult> {
   const parsed = placeOrderSchema.safeParse(raw);
   if (!parsed.success) {
+    return { ok: false, code: "invalid", message: parsed.error.issues[0]?.message ?? "Some order details are missing." };
+  }
+  const input = parsed.data;
+
+  if (!isServerWriteConfigured()) {
+    return { ok: false, code: "not_connected", message: "Ordering is not connected to the kitchen yet. This kiosk is in setup mode." };
+  }
+
+  if (input.paymentMethod !== "cash") {
     return {
       ok: false,
-      code: "invalid",
-      message: parsed.error.issues[0]?.message ?? "Some order details are missing.",
+      code: "payment_pending_setup",
+      message: "Mobile Money and card payments are being set up. Please choose Pay at the counter for now.",
     };
   }
 
-  return {
-    ok: false,
-    code: "not_connected",
-    message: "Ordering is not connected to the kitchen yet. This kiosk is in setup mode.",
-  };
+  const supabase = createAdminClient();
+  const { data, error } = await supabase.rpc("place_order", { p: input });
+
+  if (error) {
+    // P0001 = raised by place_order() on purpose; anything else is unexpected.
+    if (error.code !== "P0001") console.error("place_order failed", error);
+    const { code, message } = explain(error.message);
+    return { ok: false, code, message };
+  }
+
+  const result = data as { order_id: string; order_number: string };
+  return { ok: true, orderId: result.order_id, orderNumber: result.order_number };
 }

@@ -1,17 +1,26 @@
 import type { Metadata } from "next";
+import { loadKioskData } from "@/lib/db/load-menu";
 import { KioskProvider } from "@/lib/kiosk/kiosk-session";
-import { fixtureMenu, fixtureSettings, fixtureTables } from "@/lib/kiosk/fixture-menu";
 import { InactivityGuard } from "./_components/inactivity-guard";
 
 export const metadata: Metadata = { title: "Order here" };
 
-export default function KioskLayout({ children }: { children: React.ReactNode }) {
-  // PHASE 3: replace fixtures with a cached Supabase loader (menu, settings, tables).
+// Read the menu on every full page load so admin changes reach the kiosk.
+// Live updates without a reload arrive with Realtime in Phase 5.
+export const dynamic = "force-dynamic";
+
+export default async function KioskLayout({ children }: { children: React.ReactNode }) {
+  const { settings, menu, tables, source } = await loadKioskData();
   return (
-    <KioskProvider settings={fixtureSettings} menu={fixtureMenu} tables={fixtureTables}>
+    <KioskProvider settings={settings} menu={menu} tables={tables}>
       <div data-surface="kiosk" className="fixed inset-0 flex flex-col overflow-hidden bg-canvas">
         {children}
       </div>
+      {source === "fixture" ? (
+        <div className="pointer-events-none fixed bottom-3 left-3 z-[60] rounded-md bg-ink px-3 py-1.5 text-sm font-semibold text-white">
+          Development menu: database not connected
+        </div>
+      ) : null}
       <InactivityGuard />
     </KioskProvider>
   );

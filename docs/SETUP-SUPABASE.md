@@ -1,0 +1,32 @@
+# Connecting the database (Supabase)
+
+## 1. Create the project
+1. Sign in at https://supabase.com/dashboard and click **New project**.
+2. Name it `restaurant-kiosk`, set a strong database password (save it in a password manager), and pick the region nearest Ghana that is offered.
+3. Wait until the project finishes setting up.
+
+## 2. Create the tables
+In the dashboard open **SQL Editor** → **New query**. Run these three files from this repo, one at a time, in this order. Paste the whole file and click **Run**:
+
+1. `supabase/migrations/0001_initial_schema.sql`
+2. `supabase/migrations/0002_place_order.sql`
+3. `supabase/seed.sql`
+
+Each should end with "Success. No rows returned". Run each file once only.
+
+## 3. Copy the keys into `.env.local`
+Open **Project Settings** → **API Keys** (or **API**). Create `.env.local` in the project folder:
+
+```
+NEXT_PUBLIC_SUPABASE_URL=https://<your-project-ref>.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=<publishable key, or the legacy "anon public" key>
+SUPABASE_SERVICE_ROLE_KEY=<secret key, or the legacy "service_role" key>
+```
+
+The secret / service_role key bypasses all security rules. It only ever goes in `.env.local` and in the hosting provider's server environment variables. Never commit it, paste it in chat, or put it in code.
+
+## 4. Check
+`npm run dev`, open http://localhost:3000. The "Development menu" badge must be gone. Place a "Pay at the counter" order; it appears in **Table Editor** → `orders`.
+
+## Testing the schema without Supabase
+See `supabase/tests/`: `smoke_test.sql` and `place_order_test.sql` run on plain PostgreSQL after `local_shim.sql`.

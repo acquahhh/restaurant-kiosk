@@ -246,6 +246,7 @@ export type Database = {
     Functions: {
       current_role: { Args: Record<string, never>; Returns: UserRole | null };
       next_order_number: { Args: { p_date: string }; Returns: string };
+      place_order: { Args: { p: Json }; Returns: Json };
     };
     Enums: {
       user_role: UserRole;

@@ -40,4 +40,4 @@ export type PlaceOrderInput = z.infer<typeof placeOrderSchema>;
 
 export type PlaceOrderResult =
   | { ok: true; orderId: string; orderNumber: string }
-  | { ok: false; code: "invalid" | "unavailable" | "not_connected" | "server_error"; message: string };
+  | { ok: false; code: "invalid" | "unavailable" | "not_connected" | "payment_pending_setup" | "server_error"; message: string };
