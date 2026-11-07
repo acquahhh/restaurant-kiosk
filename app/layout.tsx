@@ -1,4 +1,6 @@
 import type { Metadata, Viewport } from "next";
+// Self-hosted so the kiosk keeps its typeface with no internet connection.
+import "@fontsource-variable/bricolage-grotesque/opsz.css";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -17,16 +19,6 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <head>
-        {/* Phase 2 moves this to next/font/local with bundled woff2 files so the
-            kiosk keeps its typeface when the internet drops. */}
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&display=swap"
-          rel="stylesheet"
-        />
-      </head>
       <body>{children}</body>
     </html>
   );
