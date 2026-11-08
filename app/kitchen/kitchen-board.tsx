@@ -172,8 +172,11 @@ export function KitchenBoard({
 
   return (
     <div className="flex h-dvh flex-col" data-surface="kitchen">
-      <header className="flex shrink-0 flex-wrap items-center gap-x-6 gap-y-2 border-b border-slate-line px-5 py-3">
-        <h1 className="text-xl font-bold">{restaurantName} <span className="font-normal text-white/50">Kitchen</span></h1>
+      <header className="flex shrink-0 flex-wrap items-center gap-x-6 gap-y-2 border-b border-t-4 border-b-slate-line border-t-palm px-5 py-3">
+        <h1 className="flex items-center gap-2.5 text-xl font-bold">
+          <span className="h-2.5 w-2.5 rounded-full bg-plantain" aria-hidden />
+          {restaurantName} <span className="font-normal text-white/50">Kitchen</span>
+        </h1>
         <span
           className={`flex items-center gap-2 text-sm font-semibold ${live === "live" ? "text-status-ready" : live === "offline" ? "text-status-new" : "text-white/60"}`}
           role="status"
@@ -241,12 +244,12 @@ export function KitchenBoard({
                   return (
                     <article
                       key={order.id}
-                      className={`rounded-lg border-l-[6px] bg-slate ${isNew ? "ring-2 ring-status-new" : ""} ${compact ? "px-3 py-2" : "p-4"}`}
+                      className={`rounded-lg border-l-[6px] bg-slate shadow-[0_0.25rem_1rem_rgba(0,0,0,0.25)] animate-[rise_380ms_cubic-bezier(0.22,1,0.36,1)_both] ${isNew ? "ring-2 ring-status-new" : ""} ${compact ? "px-3 py-2" : "p-4"}`}
                       style={{ borderLeftColor: lane.accent }}
                     >
                       <div className="flex items-baseline justify-between gap-3">
                         <span className={`${compact ? "text-xl" : "text-4xl"} font-extrabold tabular-nums tracking-tight`}>{order.order_number}</span>
-                        <span className={`text-sm font-semibold tabular-nums ${late ? "text-[#ff8a80]" : slow ? "text-status-new" : "text-white/60"}`}>
+                        <span className={`rounded-full px-2.5 py-0.5 text-sm font-semibold tabular-nums ${late ? "bg-[#ff8a80]/15 text-[#ff8a80]" : slow ? "bg-status-new/15 text-status-new" : "bg-white/5 text-white/60"}`}>
                           {compact
                             ? new Date(order.completed_at ?? order.placed_at).toLocaleTimeString("en-GH", { hour: "2-digit", minute: "2-digit" })
                             : `${minutesSince(since, now)} min${lane.status === "received" ? "" : ` in ${lane.title.toLowerCase()}`}`}

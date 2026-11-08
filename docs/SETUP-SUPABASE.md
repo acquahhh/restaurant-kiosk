@@ -16,6 +16,7 @@ In the dashboard open **SQL Editor** → **New query**. Run these three files fr
 6. `supabase/migrations/0006_payments.sql`
 7. `supabase/migrations/0007_board_order_type.sql`
 8. `supabase/migrations/0008_hardening.sql`
+9. `supabase/migrations/0009_branding.sql`
 
 Later migrations are always run in number order. Each one is safe to run again.
 

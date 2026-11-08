@@ -61,3 +61,20 @@ export async function loadKioskData(): Promise<KioskData> {
     source: "database",
   };
 }
+
+export interface Branding {
+  name: string;
+  logo_url: string | null;
+  brand_primary: string;
+  brand_accent: string;
+}
+
+/** Name, logo and colours only (status board). Public data, read with the public key. */
+export async function loadBranding(): Promise<Branding> {
+  if (!isSupabaseConfigured()) {
+    return { name: fixtureSettings.name, logo_url: null, brand_primary: fixtureSettings.brand_primary, brand_accent: fixtureSettings.brand_accent };
+  }
+  const supabase = createClient<Database>(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, { auth: { persistSession: false } });
+  const { data } = await supabase.from("restaurant_settings").select("name, logo_url, brand_primary, brand_accent").eq("id", 1).single();
+  return data ?? { name: "Restaurant", logo_url: null, brand_primary: "#16603a", brand_accent: "#f2b134" };
+}

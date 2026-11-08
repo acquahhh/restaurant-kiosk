@@ -23,6 +23,8 @@ export const fixtureSettings: RestaurantSettingsRow = {
   accept_card: true,
   default_prep_minutes: 15,
   kitchen_sound_enabled: true,
+  brand_primary: "#16603a",
+  brand_accent: "#f2b134",
   updated_at: NOW,
 };
 

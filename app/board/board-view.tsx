@@ -8,7 +8,7 @@ type Row = { order_number: string; status: string; order_type: "dine_in" | "take
 
 const POLL_MS = 4_000;
 
-export function BoardView() {
+export function BoardView({ restaurantName, logoUrl }: { restaurantName: string; logoUrl: string | null }) {
   const supabase = useMemo(() => createClient(), []);
   const [rows, setRows] = useState<Row[] | null>(null);
   const [stale, setStale] = useState(false);
@@ -16,6 +16,13 @@ export function BoardView() {
   const readyBefore = useRef<Set<string> | null>(null);
   const [soundOn, setSoundOn] = useState(false);
   const [needsUpdate, setNeedsUpdate] = useState(false);
+  const [clock, setClock] = useState("");
+  useEffect(() => {
+    const tick = () => setClock(new Date().toLocaleTimeString("en-GH", { hour: "2-digit", minute: "2-digit", timeZone: "Africa/Accra" }));
+    tick();
+    const id = window.setInterval(tick, 15_000);
+    return () => window.clearInterval(id);
+  }, []);
 
   // Sound: on without a touch when the browser allows it, else on the first touch anywhere.
   useEffect(() => {
@@ -69,52 +76,84 @@ export function BoardView() {
   const ready = rows?.filter((r) => r.status === "ready") ?? [];
 
   return (
-    <>
-    {!soundOn ? (
-      <button
-        type="button"
-        onClick={() => unlockAnnouncer()}
-        className="fixed inset-x-0 bottom-0 z-50 bg-ink py-5 text-center text-2xl font-semibold text-white"
-      >
-        Tap here to turn on announcements for takeaway orders
-      </button>
-    ) : null}
-    {needsUpdate ? (
-      <p role="alert" className="fixed inset-x-0 top-0 z-50 bg-pepper py-3 text-center text-xl font-semibold text-white">
-        Announcements need a database update: run supabase/migrations/0007_board_order_type.sql in Supabase.
-      </p>
-    ) : null}
-    <main className="grid h-dvh grid-cols-2 bg-canvas portrait:grid-cols-1 portrait:grid-rows-2" data-surface="kiosk">
-      <section className="flex flex-col bg-sand px-12 py-10">
-        <h1 className="text-5xl font-extrabold tracking-tight">Preparing</h1>
-        <ul className="mt-10 grid grid-cols-3 content-start gap-x-8 gap-y-6">
-          {preparing.map((r) => (
-            <li key={r.order_number} className="text-7xl font-extrabold tabular-nums tracking-tight text-ink-muted">{r.order_number}</li>
-          ))}
-        </ul>
-      </section>
-      <section className="flex flex-col bg-palm px-12 py-10 text-white">
-        <h2 className="text-5xl font-extrabold tracking-tight">Ready for collection</h2>
-        <ul className="mt-10 grid grid-cols-3 content-start gap-x-8 gap-y-6">
-          {ready.map((r) => (
-            <li
-              key={r.order_number}
-              className={`w-fit rounded-card text-7xl font-extrabold tabular-nums tracking-tight ${justReady.has(r.order_number) ? "bg-plantain px-4 text-ink" : ""}`}
-            >
-              {r.order_number}
-            </li>
-          ))}
-        </ul>
-        <p className="mt-auto text-2xl text-white/80">
-          Dine-in orders are brought to your table. Takeaway: collect at the counter when your number shows here.
-        </p>
-      </section>
-      {stale ? (
-        <p className="fixed bottom-4 left-1/2 -translate-x-1/2 rounded-button bg-ink px-5 py-2 text-lg font-semibold text-white">
-          Reconnecting
+    <div className="flex h-dvh flex-col bg-canvas" data-surface="kiosk">
+      {needsUpdate ? (
+        <p role="alert" className="bg-pepper py-3 text-center text-xl font-semibold text-white">
+          Announcements need a database update: run supabase/migrations/0007_board_order_type.sql in Supabase.
         </p>
       ) : null}
-    </main>
-    </>
+
+      <header className="flex shrink-0 items-center justify-between bg-ink px-12 py-5 text-white">
+        <span className="flex items-center gap-4 text-3xl font-extrabold tracking-tight">
+          {logoUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={logoUrl} alt="" className="h-14 w-14 rounded-full bg-white object-contain p-1" />
+          ) : (
+            <span className="h-4 w-4 rounded-full bg-plantain" aria-hidden />
+          )}
+          {restaurantName}
+        </span>
+        <span className="text-3xl font-bold tabular-nums text-white/80">{clock}</span>
+      </header>
+
+      <main className="grid min-h-0 flex-1 grid-cols-[1fr_1.35fr] portrait:grid-cols-1 portrait:grid-rows-[1fr_1.35fr]">
+        <section className="flex min-h-0 flex-col bg-sand px-12 py-10" aria-labelledby="preparing-title">
+          <h1 id="preparing-title" className="flex items-baseline gap-4 text-5xl font-extrabold tracking-tight">
+            Preparing
+            <span className="text-3xl font-bold text-ink-muted tabular-nums">{preparing.length}</span>
+          </h1>
+          {preparing.length === 0 ? (
+            <p className="mt-10 text-2xl text-ink-muted">No orders being prepared right now.</p>
+          ) : (
+            <ul className="mt-10 grid grid-cols-[repeat(auto-fill,minmax(10rem,1fr))] content-start gap-4 overflow-hidden">
+              {preparing.map((r) => (
+                <li key={r.order_number} className="rounded-card bg-canvas py-5 text-center text-6xl font-extrabold tabular-nums tracking-tight text-ink-muted animate-[rise_500ms_cubic-bezier(0.22,1,0.36,1)_both]">
+                  {r.order_number}
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+
+        <section className="relative isolate flex min-h-0 flex-col overflow-hidden bg-palm px-12 py-10 text-white" aria-labelledby="ready-title">
+          <span aria-hidden className="absolute -right-[14rem] -top-[14rem] -z-10 h-[36rem] w-[36rem] rounded-full border-[3rem] border-white/[0.06] animate-[drift_20s_ease-in-out_infinite_alternate]" />
+          <h2 id="ready-title" className="text-5xl font-extrabold tracking-tight">Ready for collection</h2>
+          {ready.length === 0 ? (
+            <p className="mt-10 text-2xl text-white/75">Ready orders appear here. Takeaway numbers are also called out.</p>
+          ) : (
+            <ul className="mt-10 grid grid-cols-[repeat(auto-fill,minmax(14rem,1fr))] content-start gap-5 overflow-hidden">
+              {ready.map((r) => {
+                const fresh = justReady.has(r.order_number);
+                return (
+                  <li
+                    key={r.order_number}
+                    className={`rounded-card bg-plantain py-6 text-center text-ink animate-[pop-in_600ms_cubic-bezier(0.22,1,0.36,1)_both] ${
+                      fresh ? "[animation:pop-in_600ms_cubic-bezier(0.22,1,0.36,1)_both,ready-glow_1.6s_600ms_ease-in-out_2]" : ""
+                    }`}
+                  >
+                    <span className="block text-8xl font-extrabold leading-none tabular-nums tracking-tight">{r.order_number}</span>
+                    <span className="mt-2 block text-lg font-bold uppercase tracking-wider text-ink/70">
+                      {r.order_type === "takeaway" ? "At the counter" : "To your table"}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+          <p className="mt-auto pt-6 text-2xl text-white/80">
+            Dine-in orders are brought to your table. Takeaway: collect at the counter when your number shows here.
+          </p>
+        </section>
+      </main>
+
+      {!soundOn ? (
+        <button type="button" onClick={() => unlockAnnouncer()} className="shrink-0 bg-ink py-5 text-center text-2xl font-semibold text-white">
+          Tap here to turn on announcements for takeaway orders
+        </button>
+      ) : null}
+      {stale ? (
+        <p className="fixed bottom-4 left-1/2 -translate-x-1/2 rounded-button bg-ink px-5 py-2 text-lg font-semibold text-white">Reconnecting</p>
+      ) : null}
+    </div>
   );
 }

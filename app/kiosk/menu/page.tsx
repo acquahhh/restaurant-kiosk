@@ -134,9 +134,9 @@ export default function MenuScreen() {
                     Nothing on the menu matches “{query}”. Try a shorter word, like “rice” or “chicken”.
                   </p>
                 ) : null}
-                <div className="mt-6 grid grid-cols-[repeat(auto-fill,minmax(17rem,1fr))] gap-5">
-                  {sorted(results).map((item) => (
-                    <MenuCard key={item.id} item={item} onOpen={() => openItem(item)} onAdd={() => quickAdd(item)} />
+                <div className="mt-6 grid grid-cols-[repeat(auto-fill,minmax(19rem,1fr))] gap-5">
+                  {sorted(results).map((item, i) => (
+                    <MenuCard key={item.id} index={i} item={item} onOpen={() => openItem(item)} onAdd={() => quickAdd(item)} />
                   ))}
                 </div>
               </>
@@ -146,22 +146,23 @@ export default function MenuScreen() {
                   <section aria-labelledby="featured-heading" className="mb-10">
                     <h2 id="featured-heading" className="text-3xl font-bold tracking-tight">Chef’s picks</h2>
                     <div className="mt-5 grid grid-cols-2 gap-5 portrait:grid-cols-1">
-                      {featured.map((item) => (
-                        <MenuCard key={item.id} wide item={item} onOpen={() => openItem(item)} onAdd={() => quickAdd(item)} />
+                      {featured.map((item, i) => (
+                        <MenuCard key={item.id} index={i} wide item={item} onOpen={() => openItem(item)} onAdd={() => quickAdd(item)} />
                       ))}
                     </div>
                   </section>
                 ) : null}
 
-                <h2 className="text-3xl font-bold tracking-tight">
+                <h2 className="flex items-baseline gap-3 text-3xl font-bold tracking-tight">
                   {activeSlug === POPULAR_CATEGORY_SLUG ? "Most ordered" : active?.name}
+                  <span className="text-xl font-semibold text-ink-muted">{items.length}</span>
                 </h2>
                 {items.length === 0 ? (
                   <p className="mt-6 text-xl text-ink-muted">There is nothing in this section right now.</p>
                 ) : (
-                  <div className="mt-5 grid grid-cols-[repeat(auto-fill,minmax(17rem,1fr))] gap-5">
-                    {sorted(items).map((item) => (
-                      <MenuCard key={item.id} item={item} onOpen={() => openItem(item)} onAdd={() => quickAdd(item)} />
+                  <div key={activeSlug} className="mt-5 grid grid-cols-[repeat(auto-fill,minmax(19rem,1fr))] gap-5">
+                    {sorted(items).map((item, i) => (
+                      <MenuCard key={item.id} index={i + featured.length} item={item} onOpen={() => openItem(item)} onAdd={() => quickAdd(item)} />
                     ))}
                   </div>
                 )}

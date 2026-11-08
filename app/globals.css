@@ -20,6 +20,7 @@
   --color-palm-soft: #e3efe7;     /* selected background */
   --color-plantain: #f2b134;      /* the one hero button per screen */
   --color-plantain-deep: #d99a1f;
+  --color-brand-glow: #f7cd6f;
   --color-pepper: #b3261e;        /* destructive, errors */
   --color-pepper-soft: #f9e5e3;
 
@@ -133,3 +134,19 @@
 @keyframes sheet-in { from { opacity: 0; transform: translateY(24px) scale(0.985); } to { opacity: 1; transform: none; } }
 @keyframes line-in { from { opacity: 0; transform: translateX(24px); background: var(--color-palm-soft); } to { opacity: 1; transform: none; } }
 @keyframes count-pop { 0% { transform: scale(1); } 40% { transform: scale(1.25); } 100% { transform: scale(1); } }
+/* Screen to screen: content settles in from slightly below */
+@keyframes screen-in { from { opacity: 0; transform: translateY(0.75rem); } to { opacity: 1; transform: none; } }
+/* Cards and list items arrive one after another (delay set per item) */
+@keyframes rise { from { opacity: 0; transform: translateY(1rem) scale(0.985); } to { opacity: 1; transform: none; } }
+/* Order numbers and confirmations land with a small overshoot */
+@keyframes pop-in { 0% { opacity: 0; transform: scale(0.6); } 60% { opacity: 1; transform: scale(1.06); } 100% { transform: scale(1); } }
+/* A newly ready order glows twice, then rests */
+@keyframes ready-glow { 0%, 100% { box-shadow: 0 0 0 0 transparent; } 50% { box-shadow: 0 0 0 0.75rem var(--color-brand-glow); } }
+/* Tick drawn on the confirmation screen */
+@keyframes draw { to { stroke-dashoffset: 0; } }
+/* The welcome button breathes gently to invite a tap */
+@keyframes breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.025); } }
+/* Slow drift for the welcome background shapes */
+@keyframes drift { from { transform: translate(0, 0) rotate(0deg); } to { transform: translate(-2%, 3%) rotate(8deg); } }
+/* Photos crossfade on the welcome screen */
+@keyframes fade-cycle { 0% { opacity: 0; } 8%, 33% { opacity: 1; } 41%, 100% { opacity: 0; } }

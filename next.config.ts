@@ -23,6 +23,8 @@ const nextConfig: NextConfig = {
     return [{ source: "/(.*)", headers: securityHeaders }];
   },
   images: {
+    // Only for a local test database on http://localhost; never true with Supabase (https).
+    dangerouslyAllowLocalIP: Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL?.startsWith("http://")),
     // Food photos and the logo are served from the Supabase "menu-images" bucket.
     remotePatterns: supabaseHost
       ? [{

@@ -120,7 +120,7 @@ export function CustomizeSheet({
                               group.selection_type === "single" ? "rounded-full" : "rounded-[0.5rem]"
                             } ${isOn ? "border-palm bg-palm text-white" : "border-sand-deep bg-canvas"}`}
                           >
-                            {isOn ? <CheckIcon className="h-5 w-5" /> : null}
+                            {isOn ? <CheckIcon className="h-5 w-5 animate-[pop-in_260ms_ease-out]" /> : null}
                           </span>
                           <span className="min-w-0">
                             <span className="block text-xl font-semibold leading-tight">{option.name}</span>

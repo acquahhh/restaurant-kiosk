@@ -49,10 +49,18 @@ export function ConfirmationView({ order }: { order: ConfirmedOrder }) {
 
   return (
     <main className="grid h-full grid-cols-[1fr_1fr] portrait:grid-cols-1 portrait:grid-rows-[auto_1fr]" onPointerDown={() => setRemaining(RETURN_AFTER_SECONDS)}>
-      <section className="flex flex-col justify-center bg-palm px-20 text-white portrait:px-14 portrait:py-12">
+      <section className="relative isolate flex flex-col justify-center overflow-hidden bg-palm px-20 text-white portrait:px-14 portrait:py-12">
+        <span aria-hidden className="absolute -right-[16rem] -top-[12rem] -z-10 h-[40rem] w-[40rem] rounded-full border-[3rem] border-white/[0.06] animate-[drift_18s_ease-in-out_infinite_alternate]" />
+        {/* A tick that draws itself: the order went through */}
+        <svg viewBox="0 0 52 52" className="mb-8 h-24 w-24" aria-hidden>
+          <circle cx="26" cy="26" r="24" fill="none" stroke="var(--color-plantain)" strokeWidth="3"
+            strokeDasharray="151" strokeDashoffset="151" className="animate-[draw_600ms_ease-out_forwards]" />
+          <path d="M15 27l7 7 15-16" fill="none" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"
+            strokeDasharray="40" strokeDashoffset="40" className="animate-[draw_400ms_450ms_ease-out_forwards]" />
+        </svg>
         <p className="text-3xl font-semibold text-white/80">Your order number</p>
-        <p className="mt-2 text-[16rem] portrait:text-[11rem] font-extrabold leading-none tracking-[-0.04em] tabular-nums">{order.order_number}</p>
-        <h1 className="mt-10 max-w-[22ch] text-4xl font-bold leading-tight">
+        <p className="mt-2 text-[16rem] portrait:text-[11rem] font-extrabold leading-none tracking-[-0.04em] tabular-nums animate-[pop-in_700ms_300ms_cubic-bezier(0.22,1,0.36,1)_both]">{order.order_number}</p>
+        <h1 className="mt-10 max-w-[22ch] text-4xl font-bold leading-tight animate-[rise_600ms_700ms_cubic-bezier(0.22,1,0.36,1)_both]">
           Your order has been received. Our kitchen is preparing it.
         </h1>
         <p className="mt-6 max-w-[40ch] text-2xl leading-snug text-white/85">
@@ -62,7 +70,7 @@ export function ConfirmationView({ order }: { order: ConfirmedOrder }) {
         </p>
       </section>
 
-      <section className="flex min-h-0 flex-col px-16 py-14">
+      <section className="flex min-h-0 flex-col px-16 py-14 animate-[rise_600ms_200ms_cubic-bezier(0.22,1,0.36,1)_both]">
         <dl className="grid grid-cols-2 gap-x-10 gap-y-6 text-xl">
           <div>
             <dt className="text-ink-muted">Order</dt>

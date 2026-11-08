@@ -49,6 +49,8 @@ export type RestaurantSettingsRow = {
   accept_card: boolean;
   default_prep_minutes: number;
   kitchen_sound_enabled: boolean;
+  brand_primary: string;
+  brand_accent: string;
   updated_at: string;
 }
 
@@ -199,7 +201,7 @@ export type Database = {
         RestaurantSettingsRow,
         | "id" | "tagline" | "logo_url" | "currency" | "tax_rate_bp" | "service_charge_bp"
         | "opening_hours" | "kiosk_timeout_seconds" | "accept_cash" | "accept_mobile_money"
-        | "accept_card" | "default_prep_minutes" | "kitchen_sound_enabled" | "updated_at"
+        | "accept_card" | "default_prep_minutes" | "kitchen_sound_enabled" | "brand_primary" | "brand_accent" | "updated_at"
       >;
       menu_categories: Table<
         MenuCategoryRow,

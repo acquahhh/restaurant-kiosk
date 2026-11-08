@@ -30,7 +30,15 @@ export function KioskHeader({
         {title ? (
           <h1 className="truncate text-3xl font-bold tracking-tight">{title}</h1>
         ) : (
-          <span className="text-2xl font-extrabold tracking-tight">{settings.name}</span>
+          <span className="flex items-center gap-3 text-2xl font-extrabold tracking-tight">
+            {settings.logo_url ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={settings.logo_url} alt="" className="h-11 w-11 rounded-full object-contain" />
+            ) : (
+              <span className="h-3 w-3 rounded-full bg-plantain" aria-hidden />
+            )}
+            {settings.name}
+          </span>
         )}
       </div>
       {right}

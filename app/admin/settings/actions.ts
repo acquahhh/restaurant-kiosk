@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { explainDbError, requireStaff, type ActionResult } from "@/lib/admin/auth";
 import { DAYS } from "@/lib/kiosk/opening-hours";
+import { checkBrand } from "@/lib/branding";
 
 const hhmm = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/);
 const settingsSchema = z.object({
@@ -18,6 +19,8 @@ const settingsSchema = z.object({
   kiosk_timeout_seconds: z.number().int().min(15).max(600),
   default_prep_minutes: z.number().int().min(1).max(240),
   kitchen_sound_enabled: z.boolean(),
+  brand_primary: z.string().regex(/^#[0-9a-fA-F]{6}$/),
+  brand_accent: z.string().regex(/^#[0-9a-fA-F]{6}$/),
   opening_hours: z.partialRecord(z.enum(DAYS), z.object({ open: hhmm, close: hhmm }).nullable()),
 });
 export type SettingsInput = z.infer<typeof settingsSchema>;
@@ -30,6 +33,8 @@ function refresh() {
 export async function saveSettings(raw: unknown): Promise<ActionResult> {
   const parsed = settingsSchema.safeParse(raw);
   if (!parsed.success) return { ok: false, message: `Check "${parsed.error.issues[0]?.path.join(".")}".` };
+  const brandProblem = checkBrand({ primary: parsed.data.brand_primary, accent: parsed.data.brand_accent });
+  if (brandProblem) return { ok: false, message: brandProblem };
   const { supabase } = await requireStaff(["admin"]);
   const { error } = await supabase.from("restaurant_settings").update({ ...parsed.data, logo_url: parsed.data.logo_url || null, tagline: parsed.data.tagline || null }).eq("id", 1);
   if (error) return { ok: false, message: explainDbError(error.message) };
