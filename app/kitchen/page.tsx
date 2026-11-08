@@ -7,15 +7,16 @@ export const dynamic = "force-dynamic";
 
 export default async function KitchenPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/login?next=/kitchen");
+  const { data: claims } = await supabase.auth.getClaims();
+  const userId = claims?.claims?.sub;
+  if (!userId) redirect("/login?next=/kitchen");
 
   const [profile, settings, orders] = await Promise.all([
-    supabase.from("profiles").select("full_name, role").eq("id", user.id).single(),
+    supabase.from("profiles").select("full_name, role, is_active").eq("id", userId).single(),
     supabase.from("restaurant_settings").select("name, kitchen_sound_enabled").eq("id", 1).single(),
     supabase.rpc("kitchen_orders"),
   ]);
-  if (!profile.data) redirect("/login?error=forbidden");
+  if (!profile.data?.is_active) redirect("/login?error=forbidden");
 
   return (
     <KitchenBoard

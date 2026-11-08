@@ -115,10 +115,15 @@ export async function moveCategory(id: string, direction: -1 | 1): Promise<Actio
   // Renumber everything so ties in sort_order can never block a move.
   const order = cats.map((c) => c.id);
   [order[i], order[j]] = [order[j]!, order[i]!];
-  for (const [index, cid] of order.entries()) {
-    const { error } = await supabase.from("menu_categories").update({ sort_order: index }).eq("id", cid);
-    if (error) return { ok: false, message: explainDbError(error.message) };
-  }
+  // Usually only the two swapped rows change; write those, at the same time.
+  const changes = order
+    .map((cid, index) => ({ cid, index }))
+    .filter(({ cid, index }) => cats.find((c) => c.id === cid)!.sort_order !== index);
+  const results = await Promise.all(
+    changes.map(({ cid, index }) => supabase.from("menu_categories").update({ sort_order: index }).eq("id", cid)),
+  );
+  const failed = results.find((r) => r.error);
+  if (failed?.error) return { ok: false, message: explainDbError(failed.error.message) };
   refresh();
   return { ok: true };
 }

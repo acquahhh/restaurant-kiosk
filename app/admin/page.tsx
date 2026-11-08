@@ -59,7 +59,7 @@ function Bars({ data, format, height = 180 }: { data: Array<{ label: string; val
           const h = (d.value / max) * (height / 3 - 1);
           return (
             <rect key={i} x={i * w + w * 0.15} width={w * 0.7} y={height / 3 - h} height={Math.max(h, d.value > 0 ? 0.6 : 0)} rx={0.6} className="fill-palm">
-              <title>{d.title}: {format(d.value)}</title>
+              <title>{`${d.title}: ${format(d.value)}`}</title>
             </rect>
           );
         })}
@@ -94,6 +94,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
               <Link
                 key={r.key}
                 href={`/admin?range=${r.key}`}
+                prefetch={false}
                 className={`rounded-md px-3 py-1.5 text-sm font-semibold ${r.key === range ? "bg-canvas shadow-sm" : "text-ink-muted"}`}
               >
                 {r.label}

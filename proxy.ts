@@ -1,23 +1,19 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
-import type { Database, UserRole } from "@/lib/db/database.types";
+import type { Database } from "@/lib/db/database.types";
 
 /**
  * Route protection.
  *   /kiosk/*   public — customers never sign in
  *   /track/*   public — order progress by order number
- *   /kitchen/* kitchen, manager, admin
- *   /admin/*   manager, admin (some pages are admin-only; checked in-page)
+ *   /kitchen/* signed-in staff (kitchen, manager, admin; role checked in the page)
+ *   /admin/*   signed-in staff (manager, admin; role checked in the layout)
  *   /login     public
  */
-const ACCESS: Array<{ prefix: string; roles: UserRole[] }> = [
-  { prefix: "/kitchen", roles: ["kitchen", "manager", "admin"] },
-  { prefix: "/admin", roles: ["manager", "admin"] },
-];
+const PROTECTED = ["/kitchen", "/admin"];
 
 export async function proxy(request: NextRequest) {
-  const rule = ACCESS.find((r) => request.nextUrl.pathname.startsWith(r.prefix));
-  if (!rule) return NextResponse.next();
+  if (!PROTECTED.some((p) => request.nextUrl.pathname.startsWith(p))) return NextResponse.next();
 
   let response = NextResponse.next({ request });
 
@@ -36,24 +32,14 @@ export async function proxy(request: NextRequest) {
     },
   );
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
+  // getClaims() verifies the signed session token locally (no round trip to
+  // Supabase Auth on projects with asymmetric signing keys). The page itself
+  // then checks the staff role once, and RLS enforces it in the database.
+  const { data } = await supabase.auth.getClaims();
+  if (!data?.claims?.sub) {
     const login = new URL("/login", request.url);
     login.searchParams.set("next", request.nextUrl.pathname);
     return NextResponse.redirect(login);
-  }
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role, is_active")
-    .eq("id", user.id)
-    .single();
-
-  if (!profile?.is_active || !rule.roles.includes(profile.role)) {
-    return NextResponse.redirect(new URL("/login?error=forbidden", request.url));
   }
 
   return response;

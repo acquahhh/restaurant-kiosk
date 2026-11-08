@@ -10,11 +10,12 @@ import type { UserRole } from "@/lib/db/database.types";
  */
 export async function requireStaff(roles: UserRole[] = ["admin", "manager"]) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/login?next=/admin");
-  const { data: profile } = await supabase.from("profiles").select("id, full_name, role, is_active").eq("id", user.id).single();
+  const { data } = await supabase.auth.getClaims();
+  const userId = data?.claims?.sub;
+  if (!userId) redirect("/login?next=/admin");
+  const { data: profile } = await supabase.from("profiles").select("id, full_name, role, is_active").eq("id", userId).single();
   if (!profile?.is_active || !roles.includes(profile.role)) redirect("/login?error=forbidden");
-  return { supabase, profile, user };
+  return { supabase, profile };
 }
 
 export type ActionResult = { ok: true; message?: string } | { ok: false; message: string };

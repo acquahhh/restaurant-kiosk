@@ -173,7 +173,7 @@ export function MenuManager({ categories, items }: { categories: Category[]; ite
                     {list.map((item) => (
                       <tr key={item.id} className="border-t border-sand-deep">
                         <td className="px-4 py-2.5">
-                          <Link href={`/admin/menu/${item.id}`} className="flex items-center gap-3 font-semibold hover:text-palm">
+                          <Link href={`/admin/menu/${item.id}`} prefetch={false} className="flex items-center gap-3 font-semibold hover:text-palm">
                             {item.image_url ? (
                               // eslint-disable-next-line @next/next/no-img-element
                               <img src={item.image_url} alt="" className="h-10 w-14 rounded-md object-cover" />
@@ -188,7 +188,7 @@ export function MenuManager({ categories, items }: { categories: Category[]; ite
                         <td className="px-4 py-2.5"><div className="flex justify-center"><Switch on={item.is_popular} label={`${item.name} popular`} onChange={(v) => toggle(item.id, "is_popular", v)} /></div></td>
                         <td className="px-4 py-2.5"><div className="flex justify-center"><Switch on={item.is_featured} label={`${item.name} featured`} onChange={(v) => toggle(item.id, "is_featured", v)} /></div></td>
                         <td className="px-4 py-2.5 text-right">
-                          <Link href={`/admin/menu/${item.id}`} className="inline-flex h-9 items-center rounded-md border border-sand-deep px-3 text-sm font-semibold hover:bg-sand">Edit</Link>
+                          <Link href={`/admin/menu/${item.id}`} prefetch={false} className="inline-flex h-9 items-center rounded-md border border-sand-deep px-3 text-sm font-semibold hover:bg-sand">Edit</Link>
                         </td>
                       </tr>
                     ))}

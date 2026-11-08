@@ -82,7 +82,7 @@ export default async function OrdersPage({
               {orders.map((o) => (
                 <tr key={o.id} className="border-t border-sand-deep hover:bg-sand/50">
                   <td className="px-4 py-3">
-                    <Link href={`/admin/orders/${o.id}`} className="font-bold text-palm underline-offset-2 hover:underline">{o.order_number}</Link>
+                    <Link href={`/admin/orders/${o.id}`} prefetch={false} className="font-bold text-palm underline-offset-2 hover:underline">{o.order_number}</Link>
                     {from !== to ? <span className="ml-2 text-sm text-ink-muted">{o.order_date}</span> : null}
                   </td>
                   <td className="px-4 py-3 tabular-nums">{new Date(o.placed_at).toLocaleTimeString("en-GH", { hour: "2-digit", minute: "2-digit", timeZone: "Africa/Accra" })}</td>
@@ -104,8 +104,8 @@ export default async function OrdersPage({
         <nav className="mt-4 flex items-center justify-between" aria-label="Pages">
           <span className="text-sm text-ink-muted">{count} orders, page {page} of {pages}</span>
           <div className="flex gap-2">
-            {page > 1 ? <Link className={btnSecondary} href={qs({ page: String(page - 1) })}>Previous</Link> : null}
-            {page < pages ? <Link className={btnSecondary} href={qs({ page: String(page + 1) })}>Next</Link> : null}
+            {page > 1 ? <Link prefetch={false} className={btnSecondary} href={qs({ page: String(page - 1) })}>Previous</Link> : null}
+            {page < pages ? <Link prefetch={false} className={btnSecondary} href={qs({ page: String(page + 1) })}>Next</Link> : null}
           </div>
         </nav>
       ) : null}

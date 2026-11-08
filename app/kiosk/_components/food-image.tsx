@@ -14,7 +14,9 @@ export function FoodImage({
 }) {
   if (!src) return <div className={`bg-sand ${className}`} aria-hidden />;
   return (
-    <div className={`relative overflow-hidden bg-sand ${className}`}>
+    // `relative` is only a default: a caller asking for `absolute` (the welcome
+    // hero) must win, or the box collapses to zero height and the photo vanishes.
+    <div className={`${/\b(absolute|fixed)\b/.test(className) ? "" : "relative"} overflow-hidden bg-sand ${className}`}>
       <Image src={src} alt={alt} fill sizes={sizes} className="object-cover" />
     </div>
   );
