@@ -13,6 +13,7 @@ In the dashboard open **SQL Editor** → **New query**. Run these three files fr
 3. `supabase/seed.sql`
 4. `supabase/migrations/0003_kitchen.sql`
 5. `supabase/migrations/0004_admin.sql`
+6. `supabase/migrations/0005_photo_credits.sql`
 
 Later migrations are always run in number order, once each.
 
@@ -47,3 +48,6 @@ Roles: `admin` can do everything; `manager` runs the menu, orders, tables and re
 
 ## Testing the schema without Supabase
 See `supabase/tests/`: `smoke_test.sql` and `place_order_test.sql` run on plain PostgreSQL after `local_shim.sql`.
+
+## Meal photos from Pexels (optional)
+Admin > Menu > **Find photos** searches Pexels, a library of photos that are free for commercial use, and copies the chosen photo into this project's storage. Get a free API key at https://www.pexels.com/api/ and add it to `.env.local` as `PEXELS_API_KEY=...`. Replace stock photos with photos of the restaurant's real dishes before launch: customers expect their meal to look like the picture.

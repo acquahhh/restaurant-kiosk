@@ -208,6 +208,7 @@ export const fixtureMenu: MenuCategory[] = CATALOGUE.map((cat, ci) => {
         name: spec.name,
         description: spec.description,
         image_url: null,
+        image_credit: null,
         base_price: spec.price,
         is_available: spec.available ?? true,
         is_featured: Boolean(spec.featured),

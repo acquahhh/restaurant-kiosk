@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { requireStaff } from "@/lib/admin/auth";
-import { PageHeader, btnPrimary } from "../ui";
+import { PageHeader, btnPrimary, btnSecondary } from "../ui";
 import { MenuManager } from "./menu-manager";
 
 export default async function MenuPage() {
@@ -14,7 +14,12 @@ export default async function MenuPage() {
       <PageHeader
         title="Menu"
         description="Click a price to change it. Use Edit for the name, photo, description and choices. Changes reach the kiosk on its next screen load."
-        actions={<Link href="/admin/menu/new" className={btnPrimary}>Add meal</Link>}
+        actions={
+          <div className="flex gap-2">
+            <Link href="/admin/menu/photos" className={btnSecondary}>Find photos</Link>
+            <Link href="/admin/menu/new" className={btnPrimary}>Add meal</Link>
+          </div>
+        }
       />
       <MenuManager categories={categories ?? []} items={items ?? []} />
     </>
