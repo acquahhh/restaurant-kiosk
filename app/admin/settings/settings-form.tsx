@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import type { RestaurantSettingsRow } from "@/lib/db/database.types";
 import { DAYS, DAY_LABEL, type Hours } from "@/lib/kiosk/opening-hours";
-import { BRAND_PRESETS, checkBrand } from "@/lib/branding";
+import { BRAND_PRESETS, DEFAULT_BRAND, checkBrand } from "@/lib/branding";
 import { saveSettings, type SettingsInput } from "./actions";
 import { btnPrimary, btnSecondary, input } from "../ui";
 
@@ -31,8 +31,9 @@ export function SettingsForm({ settings, canEdit }: { settings: RestaurantSettin
     kiosk_timeout_seconds: settings.kiosk_timeout_seconds,
     default_prep_minutes: settings.default_prep_minutes,
     kitchen_sound_enabled: settings.kitchen_sound_enabled,
-    brand_primary: settings.brand_primary,
-    brand_accent: settings.brand_accent,
+    // Older databases (before 0009_branding.sql) have no colour columns.
+    brand_primary: settings.brand_primary ?? DEFAULT_BRAND.primary,
+    brand_accent: settings.brand_accent ?? DEFAULT_BRAND.accent,
     hoursEnabled: Object.keys(savedHours).length > 0,
     hours: Object.fromEntries(DAYS.map((d) => [d, savedHours[d] === undefined ? { open: "08:00", close: "22:00" } : savedHours[d]])) as Hours,
   });
@@ -101,6 +102,11 @@ export function SettingsForm({ settings, canEdit }: { settings: RestaurantSettin
 
       <section className={`${box} xl:col-span-2`}>
         <h2 className="font-bold">Colours</h2>
+        {settings.brand_primary === undefined ? (
+          <p role="alert" className="mt-2 rounded-lg bg-pepper-soft p-3 text-sm font-semibold text-pepper">
+            Colours need a database update first: run supabase/migrations/0009_branding.sql in Supabase, then reload this page.
+          </p>
+        ) : null}
         <p className="mt-1 text-sm text-ink-muted">Used on the kiosk, the order status screen, the kitchen display and here. Pick a palette or set your own.</p>
         <div className="mt-4 grid gap-6 lg:grid-cols-[1fr_340px]">
           <div>
