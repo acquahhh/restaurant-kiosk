@@ -247,6 +247,13 @@ export type Database = {
       current_role: { Args: Record<string, never>; Returns: UserRole | null };
       next_order_number: { Args: { p_date: string }; Returns: string };
       place_order: { Args: { p: Json }; Returns: Json };
+      set_order_status: { Args: { p_order_id: string; p_status: OrderStatus }; Returns: OrderRow };
+      mark_cash_paid: { Args: { p_order_id: string }; Returns: OrderRow };
+      kitchen_orders: { Args: Record<string, never>; Returns: Json };
+      order_board: {
+        Args: Record<string, never>;
+        Returns: { order_number: string; status: OrderStatus; updated_at: string }[];
+      };
     };
     Enums: {
       user_role: UserRole;

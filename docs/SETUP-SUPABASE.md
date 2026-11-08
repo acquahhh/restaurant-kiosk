@@ -11,6 +11,9 @@ In the dashboard open **SQL Editor** → **New query**. Run these three files fr
 1. `supabase/migrations/0001_initial_schema.sql`
 2. `supabase/migrations/0002_place_order.sql`
 3. `supabase/seed.sql`
+4. `supabase/migrations/0003_kitchen.sql`
+
+Later migrations are always run in number order, once each.
 
 Each should end with "Success. No rows returned". Run each file once only.
 
@@ -27,6 +30,17 @@ The secret / service_role key bypasses all security rules. It only ever goes in 
 
 ## 4. Check
 `npm run dev`, open http://localhost:3000. The "Development menu" badge must be gone. Place a "Pay at the counter" order; it appears in **Table Editor** → `orders`.
+
+## 5. Create staff accounts
+1. **Authentication** → **Users** → **Add user** → **Create new user**. Enter the email and a password, tick **Auto Confirm User**, click **Create user**.
+2. **SQL Editor** → **New query**, give the account its role (`admin`, `manager` or `kitchen`):
+
+```sql
+insert into public.profiles (id, full_name, role)
+select id, 'Your Name', 'admin' from auth.users where email = 'you@example.com';
+```
+
+3. Sign in at http://localhost:3000/login. Staff screens: `/kitchen` (kitchen display) and `/board` (public order status screen, no sign-in).
 
 ## Testing the schema without Supabase
 See `supabase/tests/`: `smoke_test.sql` and `place_order_test.sql` run on plain PostgreSQL after `local_shim.sql`.
