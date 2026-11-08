@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useCallback, useEffect, useState, useTransition } from "react";
+import type { PaymentStep } from "@/lib/kiosk/order-input";
 import { useRouter } from "next/navigation";
 import { lineTotal } from "@/lib/kiosk/cart";
 import { useKiosk } from "@/lib/kiosk/kiosk-session";
@@ -9,6 +10,7 @@ import { formatGhs } from "@/lib/money";
 import { placeOrder } from "../actions";
 import { KioskHeader } from "../_components/kiosk-header";
 import { NumberPad } from "../_components/keyboard";
+import { PaymentPanel } from "../_components/payment-panel";
 import { orderTypeLabel } from "../_components/order-panel";
 import { TotalsTable } from "../_components/totals";
 import { Button, CheckIcon } from "../_components/ui";
@@ -41,6 +43,7 @@ export default function CheckoutScreen() {
   const [networkTouched, setNetworkTouched] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  const [payment, setPayment] = useState<{ step: PaymentStep; orderId: string; method: "mobile_money" | "card" } | null>(null);
 
   useEffect(() => {
     if (!hydrated) return;
@@ -89,19 +92,25 @@ export default function CheckoutScreen() {
             instructions: l.instructions,
           })),
         });
-        if (result.ok) {
-          // PHASE 3/6: route to payment status, then confirmation.
+        if (!result.ok) {
+          setError(result.message);
+          setPaymentInProgress(false);
+        } else if (!result.payment || result.payment.stage === "paid") {
           router.push(`/kiosk/confirmation/${result.orderId}`);
         } else {
-          setError(result.message);
+          // Stay "in payment" (no idle reset) while the payment panel is open.
+          setPayment({ step: result.payment, orderId: result.orderId, method: method as "mobile_money" | "card" });
         }
       } catch {
         setError("The order could not be sent. Check the connection and try again.");
-      } finally {
         setPaymentInProgress(false);
       }
     });
   }
+
+  const onPaid = useCallback(() => {
+    if (payment) router.push(`/kiosk/confirmation/${payment.orderId}`);
+  }, [payment, router]);
 
   if (!hydrated || state.lines.length === 0) return null;
 
@@ -229,11 +238,30 @@ export default function CheckoutScreen() {
               </p>
             ) : null}
             <Button variant="hero" size="lg" className="mt-6 w-full" disabled={!canPay} onClick={submit}>
-              {pending ? "Sending your order" : payLabel}
+              {pending ? (method === "cash" ? "Sending your order" : "Starting payment") : payLabel}
             </Button>
           </div>
         </aside>
       </div>
+
+      {payment ? (
+        <PaymentPanel
+          initial={payment.step}
+          amount={totals.total}
+          method={payment.method}
+          phone={momoPhone}
+          networkLabel={network ? NETWORK_LABEL[network] : "Mobile Money"}
+          onPaid={onPaid}
+          onRetry={() => {
+            setPayment(null);
+            submit(); // same order (same kiosk key), new Paystack attempt
+          }}
+          onClose={() => {
+            setPayment(null);
+            setPaymentInProgress(false);
+          }}
+        />
+      ) : null}
     </>
   );
 }

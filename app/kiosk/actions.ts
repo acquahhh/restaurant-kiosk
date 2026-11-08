@@ -2,7 +2,9 @@
 
 import { createAdminClient } from "@/lib/supabase/admin";
 import { isServerWriteConfigured } from "@/lib/supabase/config";
-import { placeOrderSchema, type PlaceOrderResult } from "@/lib/kiosk/order-input";
+import { placeOrderSchema, type PaymentStep, type PlaceOrderResult } from "@/lib/kiosk/order-input";
+import { startPaystackPayment, submitPaymentOtp, verifyAndRecord } from "@/lib/kiosk/payments";
+import { isPaystackConfigured } from "@/lib/paystack";
 
 /** Turns database error codes from place_order() into words for customers. */
 type FailureCode = Extract<PlaceOrderResult, { ok: false }>["code"];
@@ -36,8 +38,10 @@ function explain(dbMessage: string): { code: FailureCode; message: string } {
  * Places a kiosk order through public.place_order(), which reprices and
  * validates everything inside one database transaction.
  *
- * Mobile Money and card stop here until Phase 6 connects Paystack: an order
- * that cannot be paid for must not be created.
+ * Cash: the order goes straight to the kitchen, unpaid.
+ * Mobile Money / card: the order waits as pending_payment and a Paystack
+ * charge starts. It reaches the kitchen only after verifyAndRecord() has
+ * confirmed the payment with Paystack.
  */
 export async function placeOrder(raw: unknown): Promise<PlaceOrderResult> {
   const parsed = placeOrderSchema.safeParse(raw);
@@ -50,15 +54,17 @@ export async function placeOrder(raw: unknown): Promise<PlaceOrderResult> {
     return { ok: false, code: "not_connected", message: "Ordering is not connected to the kitchen yet. This kiosk is in setup mode." };
   }
 
-  if (input.paymentMethod !== "cash") {
+  if (input.paymentMethod !== "cash" && !isPaystackConfigured()) {
     return {
       ok: false,
       code: "payment_pending_setup",
-      message: "Mobile Money and card payments are being set up. Please choose Pay at the counter for now.",
+      message: "Mobile Money and card payments are not set up on this kiosk. Please choose Pay at the counter.",
     };
   }
 
   const supabase = createAdminClient();
+  // Housekeeping: cancel orders nobody paid for (cheap, indexed).
+  await supabase.rpc("expire_unpaid_orders", { p_minutes: 20 });
   const { data, error } = await supabase.rpc("place_order", { p: input });
 
   if (error) {
@@ -68,6 +74,47 @@ export async function placeOrder(raw: unknown): Promise<PlaceOrderResult> {
     return { ok: false, code, message };
   }
 
-  const result = data as { order_id: string; order_number: string };
-  return { ok: true, orderId: result.order_id, orderNumber: result.order_number };
+  const result = data as { order_id: string; order_number: string; total: number; status: string; payment_status: string; payment_reference?: string | null };
+  if (input.paymentMethod === "cash") return { ok: true, orderId: result.order_id, orderNumber: result.order_number };
+
+  // First press of Pay uses the attempt place_order created; every retry
+  // (same kiosk key, e.g. "Try again" or a different method) gets a new one.
+  let reference = result.payment_reference ?? null;
+  if (!reference) {
+    const { data: attempt, error: attemptError } = await supabase.rpc("start_payment_attempt", {
+      p_order_id: result.order_id, p_method: input.paymentMethod,
+    });
+    if (attemptError) {
+      console.error("start_payment_attempt failed", attemptError);
+      return { ok: false, code: "payment_error", message: "Payment could not be started. Please try again or ask a member of staff." };
+    }
+    const a = attempt as { already_paid: boolean; reference?: string };
+    if (a.already_paid) return { ok: true, orderId: result.order_id, orderNumber: result.order_number, payment: { stage: "paid" } };
+    reference = a.reference!;
+  }
+
+  const payment = await startPaystackPayment({
+    reference, amount: result.total, orderNumber: result.order_number, method: input.paymentMethod,
+    momoPhone: input.momoPhone, momoNetwork: input.momoNetwork,
+  });
+  return { ok: true, orderId: result.order_id, orderNumber: result.order_number, payment };
+}
+
+const REF_RE = /^ORD-\d{6}-\d{3,}-[0-9a-f]{8,10}$/;
+
+/** Polled by the kiosk while a customer pays. */
+export async function checkPayment(reference: string) {
+  if (!REF_RE.test(reference)) return { status: "failed" as const, message: "Unknown payment." };
+  try {
+    return await verifyAndRecord(reference);
+  } catch (e) {
+    console.error("checkPayment failed", e);
+    return { status: "pending" as const }; // keep waiting; a network blip is not a failed payment
+  }
+}
+
+/** Telecel Cash: the customer types the voucher code from *110#. */
+export async function submitOtp(reference: string, otp: string): Promise<PaymentStep> {
+  if (!REF_RE.test(reference) || !/^\d{4,8}$/.test(otp)) return { stage: "otp", reference, message: "Enter the code exactly as it appears on your phone." };
+  return submitPaymentOtp(reference, otp);
 }

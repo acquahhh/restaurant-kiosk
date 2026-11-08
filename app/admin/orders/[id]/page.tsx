@@ -17,7 +17,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
     supabase.from("orders").select("*").eq("id", id).single(),
     supabase.from("order_items").select("id, item_name, unit_price, quantity, line_total, special_instructions").eq("order_id", id),
     supabase.from("order_status_history").select("id, from_status, to_status, changed_at, changed_by").eq("order_id", id).order("changed_at"),
-    supabase.from("payments").select("id, method, provider, amount, status, reference, paid_at, created_at").eq("order_id", id).order("created_at"),
+    supabase.from("payments").select("id, method, provider, amount, status, reference, paid_at, created_at, raw_response").eq("order_id", id).order("created_at"),
   ]);
   if (!order) notFound();
 
@@ -103,6 +103,11 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
                       <span className="font-semibold">{p.method === "cash" ? "Cash" : p.method === "mobile_money" ? "Mobile Money" : "Card"}</span>{" "}
                       <Badge tone={p.status === "paid" ? "green" : p.status === "failed" ? "red" : "grey"}>{p.status}</Badge>
                       <span className="block text-ink-muted">{p.reference}</span>
+                      {(p.raw_response as { refund_needed?: boolean } | null)?.refund_needed ? (
+                        <span className="mt-1 block font-semibold text-pepper">Customer was charged twice. Refund this payment in Paystack.</span>
+                      ) : (p.raw_response as { needs_review?: boolean } | null)?.needs_review ? (
+                        <span className="mt-1 block font-semibold text-pepper">Paystack reported a different amount. Check this payment in Paystack.</span>
+                      ) : null}
                     </span>
                     <span className="tabular-nums">{formatGhs(p.amount)}</span>
                   </li>

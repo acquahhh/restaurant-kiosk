@@ -38,6 +38,14 @@ export const placeOrderSchema = z
 
 export type PlaceOrderInput = z.infer<typeof placeOrderSchema>;
 
+/** Where a Paystack payment stands, as the kiosk needs to show it. */
+export type PaymentStep =
+  | { stage: "paid" }
+  | { stage: "approve"; reference: string; message: string }   // Mobile Money: approve on the phone
+  | { stage: "otp"; reference: string; message: string }       // Telecel: enter the voucher code
+  | { stage: "qr"; reference: string; qrSvg: string }          // Card: scan and pay on own phone
+  | { stage: "failed"; message: string };
+
 export type PlaceOrderResult =
-  | { ok: true; orderId: string; orderNumber: string }
-  | { ok: false; code: "invalid" | "unavailable" | "not_connected" | "payment_pending_setup" | "server_error"; message: string };
+  | { ok: true; orderId: string; orderNumber: string; payment?: PaymentStep }
+  | { ok: false; code: "invalid" | "unavailable" | "not_connected" | "payment_pending_setup" | "payment_error" | "server_error"; message: string };

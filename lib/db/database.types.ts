@@ -251,6 +251,13 @@ export type Database = {
       mark_cash_paid: { Args: { p_order_id: string }; Returns: OrderRow };
       kitchen_orders: { Args: Record<string, never>; Returns: Json };
       save_menu_item: { Args: { p: Json }; Returns: string };
+      start_payment_attempt: { Args: { p_order_id: string; p_method: PaymentMethod }; Returns: Json };
+      confirm_payment: {
+        Args: { p_reference: string; p_amount: number; p_currency: string; p_provider_reference: string; p_channel: string; p_raw: Json };
+        Returns: Json;
+      };
+      fail_payment: { Args: { p_reference: string; p_raw: Json }; Returns: undefined };
+      expire_unpaid_orders: { Args: { p_minutes?: number }; Returns: number };
       sales_report: { Args: { p_from: string; p_to: string }; Returns: Json };
       order_board: {
         Args: Record<string, never>;

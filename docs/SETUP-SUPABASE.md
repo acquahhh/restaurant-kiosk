@@ -13,6 +13,7 @@ In the dashboard open **SQL Editor** → **New query**. Run these three files fr
 3. `supabase/seed.sql`
 4. `supabase/migrations/0003_kitchen.sql`
 5. `supabase/migrations/0004_admin.sql`
+6. `supabase/migrations/0006_payments.sql`
 
 Later migrations are always run in number order, once each.
 
@@ -47,3 +48,17 @@ Roles: `admin` can do everything; `manager` runs the menu, orders, tables and re
 
 ## Testing the schema without Supabase
 See `supabase/tests/`: `smoke_test.sql` and `place_order_test.sql` run on plain PostgreSQL after `local_shim.sql`.
+
+## Paystack (Mobile Money and card)
+Add to `.env.local` (test keys from Paystack → Settings → API Keys & Webhooks):
+
+```
+PAYSTACK_SECRET_KEY=sk_test_...
+NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY=pk_test_...
+PAYSTACK_ORDER_EMAIL=orders@your-restaurant.com
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+```
+
+Paystack needs an email for every charge; kiosk customers do not give one, so receipts go to `PAYSTACK_ORDER_EMAIL`, tagged per order.
+In test mode no real phone gets a prompt: use the test Mobile Money numbers and test cards from https://paystack.com/docs/payments/test-payments/.
+After deployment, set the webhook URL in Paystack to `https://<your-domain>/api/webhooks/paystack`. Until then the kiosk confirms payments by asking Paystack directly, which is enough for testing.
