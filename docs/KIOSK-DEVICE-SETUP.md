@@ -5,8 +5,10 @@ Windows touch PCs and all-in-ones, Android tablets, landscape or portrait.
 Everything scales to the screen; portrait screens get their own layout.
 
 Replace `https://YOUR-DOMAIN` below with the server's local address, e.g.
-`http://192.168.1.50:3000`, or `http://localhost:3000` on the server PC
-itself (see LOCAL-SERVER-SETUP.md: the system is not on the internet).
+`https://192.168.1.50`, or `https://localhost` on the server PC itself (see
+LOCAL-SERVER-SETUP.md: the system is not on the internet). Each screen must
+trust the restaurant's certificate first (same guide, "Trust the restaurant's
+certificate on each screen").
 
 | Screen | URL |
 |---|---|

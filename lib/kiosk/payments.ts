@@ -66,9 +66,10 @@ export async function startPaystackPayment(p: {
       trace(p.reference, `mobile money (${p.momoNetwork}) started: Paystack says "${res.data.status}"`);
       return stepFromCharge(p.reference, res.data, p.momoNetwork!);
     }
-    // A customer's phone cannot open an address inside the restaurant's network.
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "";
-    const callbackUrl = appUrl.startsWith("https://") ? `${appUrl}/pay/done` : undefined;
+    // Only if set: a customer's phone (on mobile data) cannot open an address
+    // inside the restaurant's network, so by default Paystack shows its own
+    // confirmation page. Set PAYSTACK_CALLBACK_URL only to a public https page.
+    const callbackUrl = process.env.PAYSTACK_CALLBACK_URL || undefined;
     const res = await initializeCardPayment({ reference: p.reference, amount: p.amount, orderNumber: p.orderNumber, callbackUrl });
     if (!res.status) {
       trace(p.reference, `card checkout refused by Paystack: "${res.message}"`);

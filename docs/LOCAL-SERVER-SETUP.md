@@ -27,17 +27,40 @@ or a small separate PC. 8 GB memory or more.
    npm ci
    ```
 3. Create `.env.local` with the Supabase and Paystack keys (see SETUP-SUPABASE.md).
-   Set `NEXT_PUBLIC_APP_URL=http://SERVER-IP:3000` (see step 5).
    Use **live** Paystack keys only on this PC, never in code or chat.
 4. Build once: `npm run build`.
 5. Give the PC a fixed address on the network: in the router's admin page,
    reserve an IP for it (DHCP reservation), e.g. `192.168.1.50`. Find the
    current one with `ipconfig` (IPv4 Address of the Wi-Fi or Ethernet adapter).
 6. Allow the other screens to reach it, from the local network only
-   (PowerShell **as Administrator**):
+   (PowerShell **as Administrator**). 443 is HTTPS; 80 and 3000 only redirect to it:
    ```powershell
-   New-NetFirewallRule -DisplayName "Restaurant ordering (local network only)" -Direction Inbound -Protocol TCP -LocalPort 3000 -Profile Private -RemoteAddress LocalSubnet -Action Allow
+   New-NetFirewallRule -DisplayName "Restaurant ordering (local network only)" -Direction Inbound -Protocol TCP -LocalPort 443,80,3000 -Profile Private -RemoteAddress LocalSubnet -Action Allow
    ```
+7. **Turn on HTTPS** (encrypts everything between the screens and this PC):
+   ```powershell
+   node scripts\make-certificates.mjs
+   ```
+   This creates the restaurant's own certificate authority and a certificate
+   for this PC's name and address, in the `certs` folder. Then make every
+   screen trust it once (next section). From now on the server serves
+   `https://`, and old `http://` addresses redirect automatically.
+   If the PC's address ever changes, run the script again: it keeps the same
+   authority, so the screens stay trusted. Keep `certs\ca.key` on this PC only.
+
+### Trust the restaurant's certificate on each screen (once)
+Without this, browsers refuse the connection with a security warning.
+
+- **Windows (including the server PC):** right-click `scripts\trust-certificate.cmd`
+  → **Run as administrator**. On other Windows screens, first copy
+  `certs\restaurant-ca.crt` (from the server PC, via USB) next to the script.
+  Then restart Chrome/Edge.
+- **Android:** copy `restaurant-ca.crt` to the tablet (USB, or email it to
+  yourself). Then **Settings → Security → Encryption & credentials** (or *More
+  security settings*) **→ Install a certificate → CA certificate** → choose the
+  file. Android asks for the screen lock PIN; set one if the tablet has none.
+  If `.crt` is not accepted, use `restaurant-ca.cer`.
+- Never copy `ca.key` or `server.key` anywhere. Only `restaurant-ca.crt`/`.cer`.
    The restaurant network must be set to **Private** in Windows
    (Settings → Network → your network → Network profile type → Private).
 
@@ -54,12 +77,14 @@ Use the server's fixed address, e.g. `192.168.1.50`:
 
 | Screen | Address |
 |---|---|
-| Kiosk on another device | `http://192.168.1.50:3000/kiosk` |
-| Kitchen display | `http://192.168.1.50:3000/kitchen` |
-| Status board (calls out takeaway orders) | `http://192.168.1.50:3000/board` |
-| Admin (manager's laptop or phone on the restaurant Wi-Fi) | `http://192.168.1.50:3000/admin` |
+| Kiosk on another device | `https://192.168.1.50/kiosk` |
+| Kitchen display | `https://192.168.1.50/kitchen` |
+| Status board (calls out takeaway orders) | `https://192.168.1.50/board` |
+| Admin (manager's laptop or phone on the restaurant Wi-Fi) | `https://192.168.1.50/admin` |
 
-On the server PC itself use `http://localhost:3000/...`.
+On the server PC itself use `https://localhost/...`. The PC's name works too
+(e.g. `https://kiosk-server/kiosk`) if the network resolves it; add extra
+names when creating certificates: `node scripts\make-certificates.mjs kiosk-server`.
 
 **Sound on the kitchen and status board (Windows):** start them with
 `scripts\open-kitchen.cmd` and `scripts\open-board.cmd` (add the server
@@ -73,13 +98,10 @@ The status board says "Order 42, ready for collection" twice when a takeaway
 order is marked ready. If there is no customer screen, use **Call out ready
 orders** on the kitchen display instead, with its speaker near the counter.
 
-**Android tablets over the local network:** browsers only allow "keep screen
-on" and "install as app" for secure addresses, which a local `http://` address
-is not. Either keep the tablet on its charger with Screen timeout at maximum
-(or Developer options → Stay awake), or in Chrome open
-`chrome://flags/#unsafely-treat-insecure-origin-as-secure`, add
-`http://192.168.1.50:3000`, enable it and relaunch Chrome. A kiosk browser app
-(KIOSK-DEVICE-SETUP.md, option B) keeps the screen on by itself.
+**Android tablets:** with HTTPS and the certificate trusted, "keep screen
+on", "Add to home screen → Install" and full screen all work (see
+KIOSK-DEVICE-SETUP.md). Without HTTPS they do not; then keep the tablet on its
+charger with Screen timeout at maximum.
 
 ## Keeping it safe
 - **Separate the networks:** connect the screens to a staff network the
@@ -99,6 +121,7 @@ the previous version is still installed and keeps working.
 | Problem | What to do |
 |---|---|
 | Screens show "This site can't be reached" | Is the server window open on the server PC? Is the PC on the same network? |
+| Screens show "Your connection is not private" | That screen does not trust the restaurant certificate yet (see "Trust the restaurant's certificate"), or the PC's address changed: run `node scripts\make-certificates.mjs` again and restart the server. |
 | Kitchen says "Live updates paused" | Internet is down or slow; orders still arrive every 5 seconds once it returns. |
 | Kiosk says payments cannot be reached | Internet is down: customers can still choose Pay at the counter. |
 | No announcements | Tap the bar on the status board; check the TV or speaker volume. |

@@ -10,7 +10,9 @@
     "typecheck": "tsc --noEmit",
     "test": "node --test --import tsx \"lib/**/*.test.ts\"",
     "db:types": "supabase gen types typescript --local > lib/db/database.types.ts",
-    "serve": "next start -H 0.0.0.0 -p 3000"
+    "serve": "next start -H 0.0.0.0 -p 3000",
+    "serve:https": "node scripts/https-server.mjs",
+    "certs": "node scripts/make-certificates.mjs"
   },
   "dependencies": {
     "@fontsource-variable/bricolage-grotesque": "5.3.0",

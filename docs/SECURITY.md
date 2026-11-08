@@ -7,7 +7,7 @@ what reaches the browser, payments, deployment inside the restaurant.
 
 | Layer | Protection |
 |---|---|
-| Network | The app runs on a PC inside the restaurant with no public address (LOCAL-SERVER-SETUP.md). The firewall rule admits the local network only. |
+| Network | The app runs on a PC inside the restaurant with no public address (LOCAL-SERVER-SETUP.md). The firewall rule admits the local network only. All traffic between screens and the server is HTTPS (TLS 1.3) with the restaurant's own certificate authority; plain http only redirects. |
 | Database | Row level security on every table. The public key can read the menu, settings, active tables and the order-number board, and nothing else. Every change goes through checked database functions. |
 | Money | Prices are recalculated in the database from the menu; the kiosk sends only item ids and choices. An order is marked paid only after Paystack confirms it and the database re-checks amount and currency. |
 | Staff | Roles: admin, manager, kitchen. Each admin action re-checks the role on the server; the database checks it again. |
@@ -30,6 +30,8 @@ database rules above are the real boundary, and they were tested as such.
 | 4 | Photo uploads accepted any file type and size at the storage level. | Images only, 5 MB max (0008). | Applied where Supabase Storage supports it. |
 | 5 | No limit on orders, payment checks, payment codes or sign-in attempts. | Per-device rate limits (lib/server/rate-limit.ts). | Unit tests; 11th sign-in attempt refused, even with the right password. |
 | 6 | No security headers; framework advertised in responses. | Headers added; `X-Powered-By` removed. | Verified on responses. |
+| 7 | Traffic inside the restaurant was plain http (staff passwords readable on the network). | HTTPS with the restaurant's own certificate authority; http redirects. | TLS 1.3 verified; untrusted screens refused; order, payment and sign-in work over HTTPS. |
+| 8 | Behind the HTTPS server, a device could fake its address to dodge rate limits. | The server takes the address from the connection, never from request headers. | 11 sign-in attempts with a different fake address each time were still limited. |
 
 Also verified: a stranger who signs up with the public key sees no orders,
 payments, staff or items; cannot open the kitchen feed or reports, edit the
@@ -57,10 +59,10 @@ plus the earlier suites (place_order, kitchen, admin, payments).
 
 ## Remaining risks (accepted, with mitigations)
 
-- **Local traffic is plain http.** Inside the restaurant network, pages and staff
-  sign-ins are not encrypted between the screens and the server PC. Mitigation:
-  a separate staff Wi-Fi with a strong WPA2/WPA3 password that customers never
-  get (Wi-Fi encryption protects it in the air). Local HTTPS can be added later.
+- **The restaurant's certificate authority key (`certs/ca.key`)** can issue
+  certificates every screen trusts. It stays on the server PC only (not in git,
+  never copied). If that PC is ever compromised, create a new authority
+  (delete `certs`, run the script) and re-trust the screens.
 - **Kitchen accounts can read customer names and phone numbers** on orders (they
   need order access for live updates). Use kitchen accounts only on kitchen screens.
 - **Sign-in cookies are readable by page scripts** (how Supabase's library works).
