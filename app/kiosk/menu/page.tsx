@@ -75,7 +75,7 @@ export default function MenuScreen() {
               setSearching(true);
               setTyping(true);
             }}
-            className={`flex h-touch w-[420px] items-center gap-4 rounded-button border-[3px] px-5 text-left text-xl ${
+            className={`flex h-touch w-[26.25rem] items-center gap-4 rounded-button border-[0.1875rem] px-5 text-left text-xl ${
               searching ? "border-palm" : "border-sand-deep text-ink-muted"
             }`}
           >
@@ -85,9 +85,9 @@ export default function MenuScreen() {
         }
       />
 
-      <div className="flex min-h-0 flex-1">
-        <nav className="w-[240px] shrink-0 overflow-y-auto border-r border-sand-deep py-4" aria-label="Menu categories">
-          <ul className="space-y-1 px-3">
+      <div className="flex min-h-0 flex-1 portrait:flex-col">
+        <nav className="w-[15rem] shrink-0 overflow-y-auto border-r border-sand-deep py-4 portrait:w-full portrait:overflow-x-auto portrait:overflow-y-hidden portrait:border-b portrait:border-r-0 portrait:py-3" aria-label="Menu categories">
+          <ul className="space-y-1 px-3 portrait:flex portrait:gap-2 portrait:space-y-0">
             {categories.map((c) => {
               const selected = !searching && c.slug === activeSlug;
               return (
@@ -96,7 +96,7 @@ export default function MenuScreen() {
                     type="button"
                     aria-current={selected ? "true" : undefined}
                     onClick={() => selectCategory(c.slug)}
-                    className={`flex min-h-touch-lg w-full items-center rounded-button px-5 text-left text-xl font-semibold transition-colors duration-100 ${
+                    className={`flex min-h-touch-lg w-full items-center rounded-button px-5 text-left text-xl font-semibold whitespace-nowrap transition-colors duration-100 portrait:min-h-touch portrait:w-auto ${
                       selected ? "bg-palm text-white" : "active:bg-sand"
                     }`}
                   >
@@ -134,7 +134,7 @@ export default function MenuScreen() {
                     Nothing on the menu matches “{query}”. Try a shorter word, like “rice” or “chicken”.
                   </p>
                 ) : null}
-                <div className="mt-6 grid grid-cols-3 gap-5">
+                <div className="mt-6 grid grid-cols-[repeat(auto-fill,minmax(17rem,1fr))] gap-5">
                   {sorted(results).map((item) => (
                     <MenuCard key={item.id} item={item} onOpen={() => openItem(item)} onAdd={() => quickAdd(item)} />
                   ))}
@@ -145,7 +145,7 @@ export default function MenuScreen() {
                 {activeSlug === POPULAR_CATEGORY_SLUG && featured.length > 0 ? (
                   <section aria-labelledby="featured-heading" className="mb-10">
                     <h2 id="featured-heading" className="text-3xl font-bold tracking-tight">Chef’s picks</h2>
-                    <div className="mt-5 grid grid-cols-2 gap-5">
+                    <div className="mt-5 grid grid-cols-2 gap-5 portrait:grid-cols-1">
                       {featured.map((item) => (
                         <MenuCard key={item.id} wide item={item} onOpen={() => openItem(item)} onAdd={() => quickAdd(item)} />
                       ))}
@@ -159,7 +159,7 @@ export default function MenuScreen() {
                 {items.length === 0 ? (
                   <p className="mt-6 text-xl text-ink-muted">There is nothing in this section right now.</p>
                 ) : (
-                  <div className="mt-5 grid grid-cols-3 gap-5">
+                  <div className="mt-5 grid grid-cols-[repeat(auto-fill,minmax(17rem,1fr))] gap-5">
                     {sorted(items).map((item) => (
                       <MenuCard key={item.id} item={item} onOpen={() => openItem(item)} onAdd={() => quickAdd(item)} />
                     ))}

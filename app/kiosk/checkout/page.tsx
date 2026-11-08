@@ -118,7 +118,7 @@ export default function CheckoutScreen() {
     <>
       <KioskHeader backHref="/kiosk/cart" backLabel="Order" title="Checkout" />
 
-      <div className="flex min-h-0 flex-1">
+      <div className="flex min-h-0 flex-1 portrait:flex-col">
         <main className="min-w-0 flex-1 overflow-y-auto px-12 py-8">
           <h2 className="text-3xl font-bold tracking-tight">How would you like to pay?</h2>
           {methods.length === 0 ? (
@@ -139,13 +139,13 @@ export default function CheckoutScreen() {
                     setMethod(m);
                     setError(null);
                   }}
-                  className={`flex min-h-[180px] flex-col rounded-card border-[3px] p-7 text-left transition-colors duration-150 ${
+                  className={`flex min-h-[11.25rem] flex-col rounded-card border-[0.1875rem] p-7 text-left transition-colors duration-150 ${
                     selected ? "border-palm bg-palm-soft" : "border-sand-deep active:bg-sand"
                   }`}
                 >
                   <span className="flex items-center justify-between">
                     <span className="text-3xl font-bold tracking-tight">{METHOD_TEXT[m].title}</span>
-                    <span className={`grid h-10 w-10 place-items-center rounded-full border-[3px] ${
+                    <span className={`grid h-10 w-10 place-items-center rounded-full border-[0.1875rem] ${
                       selected ? "border-palm bg-palm text-white" : "border-sand-deep"
                     }`}>
                       {selected ? <CheckIcon className="h-5 w-5" /> : null}
@@ -159,14 +159,14 @@ export default function CheckoutScreen() {
 
           {method === "mobile_money" ? (
             <section className="mt-10 flex gap-12" aria-label="Mobile Money details">
-              <div className="w-[480px] shrink-0">
+              <div className="w-[30rem] shrink-0">
                 <label className="block">
                   <span className="text-2xl font-semibold">Mobile Money number</span>
                   <input
                     readOnly
                     inputMode="none"
                     value={formatPhone(momoPhone)}
-                    className="mt-3 h-touch-lg w-full rounded-button border-[3px] border-palm bg-canvas px-5 text-4xl font-bold tabular-nums tracking-wide outline-none"
+                    className="mt-3 h-touch-lg w-full rounded-button border-[0.1875rem] border-palm bg-canvas px-5 text-4xl font-bold tabular-nums tracking-wide outline-none"
                     aria-describedby="momo-help"
                   />
                 </label>
@@ -187,7 +187,7 @@ export default function CheckoutScreen() {
                         setNetwork(n);
                         setNetworkTouched(true);
                       }}
-                      className={`min-h-touch-lg rounded-button border-[3px] px-3 text-lg font-semibold leading-tight ${
+                      className={`min-h-touch-lg rounded-button border-[0.1875rem] px-3 text-lg font-semibold leading-tight ${
                         network === n ? "border-palm bg-palm-soft" : "border-sand-deep active:bg-sand"
                       }`}
                     >
@@ -217,7 +217,7 @@ export default function CheckoutScreen() {
           ) : null}
         </main>
 
-        <aside className="flex w-[520px] shrink-0 flex-col border-l border-sand-deep bg-sand px-10 py-8">
+        <aside className="flex w-[32.5rem] shrink-0 flex-col border-l border-sand-deep bg-sand px-10 py-8 portrait:max-h-[40%] portrait:w-full portrait:border-l-0 portrait:border-t">
           <h2 className="text-2xl font-semibold">{orderTypeLabel(state.orderType, state.tableNumber, state.customerName)}</h2>
           <ul className="mt-6 min-h-0 flex-1 space-y-3 overflow-y-auto text-xl">
             {state.lines.map((l) => (

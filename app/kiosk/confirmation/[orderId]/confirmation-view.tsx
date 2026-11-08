@@ -48,10 +48,10 @@ export function ConfirmationView({ order }: { order: ConfirmedOrder }) {
   const unpaidCash = order.payment_method === "cash" && order.payment_status !== "paid";
 
   return (
-    <main className="grid h-full grid-cols-[1fr_1fr]" onPointerDown={() => setRemaining(RETURN_AFTER_SECONDS)}>
-      <section className="flex flex-col justify-center bg-palm px-20 text-white">
+    <main className="grid h-full grid-cols-[1fr_1fr] portrait:grid-cols-1 portrait:grid-rows-[auto_1fr]" onPointerDown={() => setRemaining(RETURN_AFTER_SECONDS)}>
+      <section className="flex flex-col justify-center bg-palm px-20 text-white portrait:px-14 portrait:py-12">
         <p className="text-3xl font-semibold text-white/80">Your order number</p>
-        <p className="mt-2 text-[16rem] font-extrabold leading-none tracking-[-0.04em] tabular-nums">{order.order_number}</p>
+        <p className="mt-2 text-[16rem] portrait:text-[11rem] font-extrabold leading-none tracking-[-0.04em] tabular-nums">{order.order_number}</p>
         <h1 className="mt-10 max-w-[22ch] text-4xl font-bold leading-tight">
           Your order has been received. Our kitchen is preparing it.
         </h1>
@@ -112,7 +112,7 @@ export function ConfirmationView({ order }: { order: ConfirmedOrder }) {
           <Button variant="hero" size="lg" className="flex-1" onClick={() => router.replace("/kiosk")}>
             Done
           </Button>
-          <p className="w-[220px] text-lg text-ink-muted">
+          <p className="w-[13.75rem] text-lg text-ink-muted">
             This screen closes in <span className="font-bold tabular-nums text-ink">{Math.max(remaining, 0)}</span> seconds.
           </p>
         </div>

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { loadKioskData } from "@/lib/db/load-menu";
 import { KioskProvider } from "@/lib/kiosk/kiosk-session";
+import { DeviceGuard } from "./_components/device-guard";
 import { InactivityGuard } from "./_components/inactivity-guard";
 
 export const metadata: Metadata = { title: "Order here" };
@@ -22,6 +23,7 @@ export default async function KioskLayout({ children }: { children: React.ReactN
         </div>
       ) : null}
       <InactivityGuard />
+      <DeviceGuard />
     </KioskProvider>
   );
 }

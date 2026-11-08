@@ -48,7 +48,7 @@ export function BoardView() {
   const ready = rows?.filter((r) => r.status === "ready") ?? [];
 
   return (
-    <main className="grid h-dvh grid-cols-2 bg-canvas" data-surface="kiosk">
+    <main className="grid h-dvh grid-cols-2 bg-canvas portrait:grid-cols-1 portrait:grid-rows-2" data-surface="kiosk">
       <section className="flex flex-col bg-sand px-12 py-10">
         <h1 className="text-5xl font-extrabold tracking-tight">Preparing</h1>
         <ul className="mt-10 grid grid-cols-3 content-start gap-x-8 gap-y-6">

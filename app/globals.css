@@ -33,13 +33,13 @@
   --color-status-done: #7d8794;
 
   /* Radii: hierarchy, not one radius everywhere */
-  --radius-button: 14px;
-  --radius-card: 20px;
-  --radius-panel: 28px;
+  --radius-button: 0.875rem;
+  --radius-card: 1.25rem;
+  --radius-panel: 1.75rem;
 
   /* Touch sizing */
-  --spacing-touch: 64px;          /* minimum height of any kiosk target */
-  --spacing-touch-lg: 88px;       /* primary kiosk buttons */
+  --spacing-touch: 4rem;          /* minimum kiosk target: 64px on a 1080p screen */
+  --spacing-touch-lg: 5.5rem;     /* primary kiosk buttons: 88px on 1080p */
 
   /* Motion */
   --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
@@ -56,6 +56,15 @@
     --text-kiosk-heading: 2.5rem;      /* 40px */
     --text-kiosk-display: 4.5rem;      /* 72px */
     --text-kiosk-price: 1.875rem;      /* 30px, heavy */
+  }
+
+  /* Kiosk and status board scale with the screen. Every size is in rem, and
+     1rem is 16px on a 1920x1080 screen (landscape or portrait), shrinking or
+     growing in proportion on other screens: 1366x768 → ~11.4px, 1280x800
+     tablet → ~11.9px, 800x1280 portrait tablet → ~11.9px. Layout reflows for
+     portrait screens with the portrait: variant. */
+  html:has([data-surface="kiosk"]) {
+    font-size: clamp(10px, min(1.4815vmin, 0.95vmax), 24px);
   }
 
   html {

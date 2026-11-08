@@ -64,7 +64,7 @@ export function InactivityGuard() {
   }, [sessionActive, paymentInProgress, timeoutMs, router]);
 
   return (
-    <Dialog open={warning} labelledBy="idle-title" className="w-[640px]">
+    <Dialog open={warning} labelledBy="idle-title" className="w-[40rem]">
       <div className="p-10">
         <h2 id="idle-title" className="text-4xl font-bold tracking-tight">Are you still ordering?</h2>
         <p className="mt-4 text-xl text-ink-muted">

@@ -17,7 +17,7 @@ const VARIANTS: Record<Variant, string> = {
 const SIZES: Record<Size, string> = {
   md: "min-h-touch px-6 text-xl",
   lg: "min-h-touch-lg px-10 text-2xl",
-  xl: "min-h-[120px] px-12 text-4xl font-bold",
+  xl: "min-h-[7.5rem] px-12 text-4xl font-bold",
 };
 
 export const Button = forwardRef<
@@ -52,7 +52,7 @@ export function Stepper({
     <div className="inline-flex items-center gap-1 rounded-button bg-sand p-1" role="group" aria-label={label}>
       <button
         type="button"
-        className={`${size} rounded-[10px] font-semibold active:bg-sand-deep disabled:text-ink-muted/40`}
+        className={`${size} rounded-[0.625rem] font-semibold active:bg-sand-deep disabled:text-ink-muted/40`}
         onClick={() => onChange(Math.max(floor, value - 1))}
         disabled={value <= floor}
         aria-label={`Decrease ${label}`}
@@ -64,7 +64,7 @@ export function Stepper({
       </output>
       <button
         type="button"
-        className={`${size} rounded-[10px] font-semibold active:bg-sand-deep disabled:text-ink-muted/40`}
+        className={`${size} rounded-[0.625rem] font-semibold active:bg-sand-deep disabled:text-ink-muted/40`}
         onClick={() => onChange(Math.min(max, value + 1))}
         disabled={value >= max}
         aria-label={`Increase ${label}`}
@@ -115,7 +115,7 @@ export function Dialog({
         role="dialog"
         aria-modal="true"
         aria-labelledby={labelledBy}
-        className={`relative flex max-h-full flex-col overflow-hidden rounded-panel bg-canvas shadow-[0_24px_80px_rgba(28,27,24,0.35)] animate-[sheet-in_240ms_cubic-bezier(0.22,1,0.36,1)] ${className}`}
+        className={`relative flex max-h-full max-w-full flex-col overflow-hidden rounded-panel bg-canvas shadow-[0_1.5rem_5rem_rgba(28,27,24,0.35)] animate-[sheet-in_240ms_cubic-bezier(0.22,1,0.36,1)] ${className}`}
       >
         {children}
       </div>

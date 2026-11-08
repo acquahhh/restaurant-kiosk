@@ -25,7 +25,7 @@ export function MenuCard({
           src={item.image_url}
           alt={item.name}
           sizes={wide ? "300px" : "380px"}
-          className={wide ? "w-[300px] shrink-0" : "aspect-[4/3] w-full"}
+          className={wide ? "w-[18.75rem] shrink-0" : "aspect-[4/3] w-full"}
         />
       ) : null}
       <button
@@ -37,7 +37,7 @@ export function MenuCard({
       >
         <h3 className={`${wide ? "text-3xl" : "text-2xl"} font-bold leading-tight tracking-tight`}>{item.name}</h3>
         <p className="mt-2 line-clamp-3 text-lg leading-snug text-ink-muted">{item.description}</p>
-        <span className="mt-auto pt-5 text-2xl font-extrabold tabular-nums tracking-tight">{formatGhs(item.base_price)}</span>
+        <span className="mt-auto flex min-h-touch items-end pr-[7.5rem] pt-4 text-2xl font-extrabold tabular-nums tracking-tight">{formatGhs(item.base_price)}</span>
       </button>
       <div className="absolute bottom-5 right-5">
         {soldOut ? (

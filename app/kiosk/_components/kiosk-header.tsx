@@ -42,7 +42,7 @@ export function KioskHeader({
         Start over
       </Button>
 
-      <Dialog open={confirm} onClose={() => setConfirm(false)} labelledBy="restart-title" className="w-[600px]">
+      <Dialog open={confirm} onClose={() => setConfirm(false)} labelledBy="restart-title" className="w-[37.5rem]">
         <div className="p-10">
           <h2 id="restart-title" className="text-4xl font-bold tracking-tight">Start a new order?</h2>
           <p className="mt-4 text-xl text-ink-muted">Everything in this order will be removed.</p>

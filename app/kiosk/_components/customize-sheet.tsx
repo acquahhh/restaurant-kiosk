@@ -55,14 +55,14 @@ export function CustomizeSheet({
   }
 
   return (
-    <Dialog open onClose={onClose} labelledBy="customize-title" className="h-[940px] w-[1400px]">
-      <div className="flex min-h-0 flex-1">
+    <Dialog open onClose={onClose} labelledBy="customize-title" className="h-[58.75rem] w-[87.5rem] portrait:h-[85%] portrait:w-full">
+      <div className="flex min-h-0 flex-1 portrait:flex-col">
         {/* Meal summary */}
-        <aside className="flex w-[440px] shrink-0 flex-col bg-sand">
+        <aside className="flex w-[27.5rem] shrink-0 flex-col bg-sand portrait:w-full portrait:flex-row">
           {item.image_url ? (
-            <FoodImage src={item.image_url} alt={item.name} sizes="440px" className="aspect-[4/3] w-full" />
+            <FoodImage src={item.image_url} alt={item.name} sizes="440px" className="aspect-[4/3] w-full portrait:w-[16rem] portrait:shrink-0" />
           ) : null}
-          <div className="flex flex-1 flex-col p-10">
+          <div className="flex flex-1 flex-col p-10 portrait:p-8">
             <h2 id="customize-title" className="text-4xl font-bold leading-tight tracking-tight">
               {item.name}
             </h2>
@@ -111,13 +111,13 @@ export function CustomizeSheet({
                           aria-checked={isOn}
                           disabled={disabled}
                           onClick={() => setSelections((s) => toggleOption(group, s, option.id))}
-                          className={`flex min-h-[96px] items-center gap-4 rounded-button border-[3px] px-5 text-left transition-colors duration-100 disabled:opacity-40 ${
+                          className={`flex min-h-[6rem] items-center gap-4 rounded-button border-[0.1875rem] px-5 text-left transition-colors duration-100 disabled:opacity-40 ${
                             isOn ? "border-palm bg-palm-soft" : "border-sand-deep active:bg-sand"
                           }`}
                         >
                           <span
-                            className={`grid h-8 w-8 shrink-0 place-items-center border-[3px] ${
-                              group.selection_type === "single" ? "rounded-full" : "rounded-[8px]"
+                            className={`grid h-8 w-8 shrink-0 place-items-center border-[0.1875rem] ${
+                              group.selection_type === "single" ? "rounded-full" : "rounded-[0.5rem]"
                             } ${isOn ? "border-palm bg-palm text-white" : "border-sand-deep bg-canvas"}`}
                           >
                             {isOn ? <CheckIcon className="h-5 w-5" /> : null}
@@ -147,7 +147,7 @@ export function CustomizeSheet({
               <button
                 type="button"
                 onClick={() => setNoteOpen((o) => !o)}
-                className={`mt-4 flex min-h-touch-lg w-full items-center rounded-button border-[3px] px-5 text-left text-xl ${
+                className={`mt-4 flex min-h-touch-lg w-full items-center rounded-button border-[0.1875rem] px-5 text-left text-xl ${
                   noteOpen ? "border-palm" : "border-sand-deep"
                 }`}
               >

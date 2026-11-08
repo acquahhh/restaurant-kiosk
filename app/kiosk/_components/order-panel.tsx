@@ -18,8 +18,8 @@ export function OrderPanel({ onEdit }: { onEdit: (line: CartLine) => void }) {
   const lastLineId = state.lines.at(-1)?.lineId;
 
   return (
-    <aside className="flex w-[460px] shrink-0 flex-col border-l border-sand-deep bg-sand" aria-label="Your order">
-      <div className="px-8 pb-4 pt-7">
+    <aside className="flex w-[28.75rem] shrink-0 flex-col border-l border-sand-deep bg-sand portrait:w-full portrait:flex-row portrait:items-center portrait:border-l-0 portrait:border-t" aria-label="Your order">
+      <div className="px-8 pb-4 pt-7 portrait:flex-1 portrait:py-5">
         <div className="flex items-baseline justify-between">
           <h2 className="text-3xl font-bold tracking-tight">Your order</h2>
           {count > 0 ? (
@@ -31,13 +31,13 @@ export function OrderPanel({ onEdit }: { onEdit: (line: CartLine) => void }) {
         <button
           type="button"
           onClick={() => router.push("/kiosk/order-type")}
-          className="mt-2 text-lg font-semibold text-palm underline decoration-2 underline-offset-4"
+          className="-ml-2 mt-1 inline-flex min-h-touch items-center px-2 text-lg font-semibold text-palm underline decoration-2 underline-offset-4"
         >
           {orderTypeLabel(state.orderType, state.tableNumber, state.customerName)}
         </button>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto px-4">
+      <div className="min-h-0 flex-1 overflow-y-auto px-4 portrait:hidden">
         {state.lines.length === 0 ? (
           <p className="px-4 pt-10 text-xl leading-relaxed text-ink-muted">
             Your order is empty. Tap a meal to add it.
@@ -86,15 +86,15 @@ export function OrderPanel({ onEdit }: { onEdit: (line: CartLine) => void }) {
         )}
       </div>
 
-      <div className="border-t border-sand-deep px-8 pb-8 pt-5">
-        <div className="flex items-baseline justify-between">
+      <div className="border-t border-sand-deep px-8 pb-8 pt-5 portrait:flex portrait:items-center portrait:gap-8 portrait:border-t-0 portrait:py-5">
+        <div className="flex items-baseline justify-between gap-4">
           <span className="text-xl font-semibold">Total</span>
           <span className="price">{formatGhs(totals.total)}</span>
         </div>
         <Button
           variant="hero"
           size="lg"
-          className="mt-5 w-full"
+          className="mt-5 w-full portrait:mt-0 portrait:w-[20rem]"
           disabled={state.lines.length === 0}
           onClick={() => router.push("/kiosk/cart")}
         >

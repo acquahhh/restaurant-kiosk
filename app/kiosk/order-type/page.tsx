@@ -58,7 +58,7 @@ export default function OrderTypeScreen() {
                   setType(value);
                   setShowErrors(false);
                 }}
-                className={`flex min-h-[148px] items-center justify-between rounded-card border-[3px] px-10 text-left transition-colors duration-150 ${
+                className={`flex min-h-[9.25rem] items-center justify-between rounded-card border-[0.1875rem] px-10 text-left transition-colors duration-150 ${
                   selected ? "border-palm bg-palm-soft" : "border-sand-deep bg-canvas active:bg-sand"
                 }`}
               >
@@ -67,7 +67,7 @@ export default function OrderTypeScreen() {
                   <span className="mt-2 block text-xl text-ink-muted">{hint}</span>
                 </span>
                 <span
-                  className={`grid h-12 w-12 shrink-0 place-items-center rounded-full border-[3px] ${
+                  className={`grid h-12 w-12 shrink-0 place-items-center rounded-full border-[0.1875rem] ${
                     selected ? "border-palm bg-palm text-white" : "border-sand-deep"
                   }`}
                 >
@@ -85,14 +85,14 @@ export default function OrderTypeScreen() {
                 Your table number
               </h2>
               <p className="mt-1 text-xl text-ink-muted">It is printed on the stand on your table.</p>
-              <div className="mt-6 grid grid-cols-8 gap-4">
+              <div className="mt-6 grid grid-cols-[repeat(auto-fill,minmax(5.5rem,1fr))] gap-4">
                 {tables.map((t) => (
                   <button
                     key={t}
                     type="button"
                     aria-pressed={table === t}
                     onClick={() => setTable(t)}
-                    className={`h-[88px] rounded-button text-3xl font-bold tabular-nums transition-colors duration-100 ${
+                    className={`h-[5.5rem] rounded-button text-3xl font-bold tabular-nums transition-colors duration-100 ${
                       table === t ? "bg-palm text-white" : "bg-sand active:bg-sand-deep"
                     }`}
                   >
@@ -105,8 +105,8 @@ export default function OrderTypeScreen() {
           ) : null}
 
           {type === "takeaway" ? (
-            <section className="flex h-full gap-10" aria-label="Your details">
-              <div className="w-[420px] shrink-0 space-y-6">
+            <section className="flex h-full gap-10 portrait:flex-col portrait:gap-6" aria-label="Your details">
+              <div className="w-[26.25rem] shrink-0 space-y-6 portrait:grid portrait:w-full portrait:grid-cols-2 portrait:gap-6 portrait:space-y-0">
                 <label className="block" onClick={() => setField("name")}>
                   <span className="text-2xl font-semibold">Your name</span>
                   <span className="mt-1 block text-lg text-ink-muted">We call it when your order is ready.</span>
@@ -115,7 +115,7 @@ export default function OrderTypeScreen() {
                     inputMode="none"
                     value={name}
                     onFocus={() => setField("name")}
-                    className={`mt-3 h-touch-lg w-full rounded-button border-[3px] bg-canvas px-5 text-3xl font-semibold outline-none ${
+                    className={`mt-3 h-touch-lg w-full rounded-button border-[0.1875rem] bg-canvas px-5 text-3xl font-semibold outline-none ${
                       field === "name" ? "border-palm" : "border-sand-deep"
                     }`}
                   />
@@ -132,7 +132,7 @@ export default function OrderTypeScreen() {
                     inputMode="none"
                     value={formatPhone(phone)}
                     onFocus={() => setField("phone")}
-                    className={`mt-3 h-touch-lg w-full rounded-button border-[3px] bg-canvas px-5 text-3xl font-semibold tabular-nums outline-none ${
+                    className={`mt-3 h-touch-lg w-full rounded-button border-[0.1875rem] bg-canvas px-5 text-3xl font-semibold tabular-nums outline-none ${
                       field === "phone" ? "border-palm" : "border-sand-deep"
                     }`}
                   />
@@ -142,7 +142,7 @@ export default function OrderTypeScreen() {
                 </label>
               </div>
 
-              <div className="flex flex-1 items-start justify-center">
+              <div className="flex flex-1 items-start justify-center portrait:flex-none">
                 {field === "name" ? (
                   <LetterKeyboard
                     extraKeys={["-", "'"]}
@@ -168,7 +168,7 @@ export default function OrderTypeScreen() {
         </div>
 
         <div className="flex justify-end pt-6">
-          <Button variant="hero" size="lg" className="w-[420px]" onClick={proceed} disabled={type === null}>
+          <Button variant="hero" size="lg" className="w-[26.25rem]" onClick={proceed} disabled={type === null}>
             See the menu
           </Button>
         </div>

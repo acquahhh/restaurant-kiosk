@@ -85,8 +85,8 @@ export function PaymentPanel({
     : "Approve the payment on your phone";
 
   return (
-    <Dialog open labelledBy="pay-title" className="w-[1100px]">
-      <div className="grid grid-cols-[1fr_380px]">
+    <Dialog open labelledBy="pay-title" className="w-[68.75rem]">
+      <div className="grid grid-cols-[1fr_23.75rem] portrait:grid-cols-1">
         <div className="p-12">
           <p className="text-xl font-semibold text-ink-muted">{method === "card" ? "Card payment" : networkLabel}</p>
           <h2 id="pay-title" className="mt-2 text-5xl font-bold leading-tight tracking-tight">{heading}</h2>
@@ -106,10 +106,10 @@ export function PaymentPanel({
               <div className="max-w-[30ch]">
                 <p className="text-xl leading-snug">{step.message}</p>
                 {step.error ? <p role="alert" className="mt-3 text-lg font-semibold text-pepper">{step.error}</p> : null}
-                <output className="mt-6 block h-touch-lg w-[280px] rounded-button border-[3px] border-palm px-5 text-4xl font-bold leading-[82px] tracking-[0.3em] tabular-nums">
+                <output className="mt-6 block h-touch-lg w-[17.5rem] rounded-button border-[0.1875rem] border-palm px-5 text-4xl font-bold leading-[5.125rem] tracking-[0.3em] tabular-nums">
                   {otp}
                 </output>
-                <Button variant="hero" size="lg" className="mt-6 w-[280px]" disabled={busy || otp.length < 4} onClick={sendOtp}>
+                <Button variant="hero" size="lg" className="mt-6 w-[17.5rem]" disabled={busy || otp.length < 4} onClick={sendOtp}>
                   {busy ? "Checking" : "Confirm code"}
                 </Button>
               </div>
@@ -119,7 +119,7 @@ export function PaymentPanel({
 
           {step.stage === "qr" && !waitedOut ? (
             <div className="mt-6 flex items-center gap-10">
-              <div className="h-[300px] w-[300px] shrink-0 rounded-card bg-white p-3 [&>svg]:h-full [&>svg]:w-full" aria-label="Payment QR code" role="img"
+              <div className="h-[18.75rem] w-[18.75rem] shrink-0 rounded-card bg-white p-3 [&>svg]:h-full [&>svg]:w-full" aria-label="Payment QR code" role="img"
                 dangerouslySetInnerHTML={{ __html: step.qrSvg }} />
               <ol className="list-decimal space-y-3 pl-6 text-xl leading-snug">
                 <li>Open your phone camera and point it at the code.</li>

@@ -31,7 +31,7 @@ export default function CartScreen() {
     <>
       <KioskHeader backHref="/kiosk/menu" backLabel="Menu" title="Review your order" />
 
-      <div className="flex min-h-0 flex-1">
+      <div className="flex min-h-0 flex-1 portrait:flex-col">
         <main className="min-w-0 flex-1 overflow-y-auto px-12 py-8">
           {empty ? (
             <div className="max-w-[40ch] pt-16">
@@ -46,7 +46,7 @@ export default function CartScreen() {
               {state.lines.map((line) => (
                 <li key={line.lineId} className="flex items-center gap-8 py-6">
                   {line.imageUrl ? (
-                    <FoodImage src={line.imageUrl} alt="" sizes="160px" className="h-[120px] w-[160px] shrink-0 rounded-card" />
+                    <FoodImage src={line.imageUrl} alt="" sizes="160px" className="h-[7.5rem] w-[10rem] shrink-0 rounded-card" />
                   ) : null}
                   <div className="min-w-0 flex-1">
                     <h3 className="text-2xl font-bold leading-tight">{line.name}</h3>
@@ -73,7 +73,7 @@ export default function CartScreen() {
                     onChange={(n) => changeQuantity(line.lineId, n)}
                     label={`${line.name} quantity`}
                   />
-                  <div className="w-[180px] shrink-0 text-right">
+                  <div className="w-[11.25rem] shrink-0 text-right">
                     <span className="text-2xl font-extrabold tabular-nums">{formatGhs(lineTotal(line))}</span>
                     {line.quantity > 1 ? (
                       <span className="mt-1 block text-lg tabular-nums text-ink-muted">{formatGhs(line.unitPrice)} each</span>
@@ -85,11 +85,11 @@ export default function CartScreen() {
           )}
         </main>
 
-        <aside className="flex w-[520px] shrink-0 flex-col border-l border-sand-deep bg-sand px-10 py-8">
+        <aside className="flex w-[32.5rem] shrink-0 flex-col border-l border-sand-deep bg-sand px-10 py-8 portrait:w-full portrait:border-l-0 portrait:border-t">
           <h2 className="text-2xl font-semibold">{orderTypeLabel(state.orderType, state.tableNumber, state.customerName)}</h2>
           <button
             type="button"
-            className="mt-1 self-start text-lg font-semibold text-palm underline decoration-2 underline-offset-4"
+            className="-ml-2 inline-flex min-h-touch items-center self-start px-2 text-lg font-semibold text-palm underline decoration-2 underline-offset-4"
             onClick={() => router.push("/kiosk/order-type")}
           >
             Change

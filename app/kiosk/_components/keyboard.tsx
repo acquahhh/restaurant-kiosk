@@ -13,7 +13,7 @@ const ROWS = [
 ];
 
 const keyBase =
-  "h-[72px] rounded-[12px] bg-canvas text-2xl font-semibold shadow-[0_1px_0_var(--color-sand-deep)] active:bg-sand-deep transition-colors duration-100";
+  "h-[4.5rem] rounded-[0.75rem] bg-canvas text-2xl font-semibold shadow-[0_0.0625rem_0_var(--color-sand-deep)] active:bg-sand-deep transition-colors duration-100";
 
 export function LetterKeyboard({
   onKey, onBackspace, onSpace, onDone, doneLabel = "Done", extraKeys = [],
@@ -31,25 +31,25 @@ export function LetterKeyboard({
       {ROWS.map((row, i) => (
         <div key={i} className="flex justify-center gap-2">
           {row.map((k) => (
-            <button key={k} type="button" className={`${keyBase} w-[76px]`} onClick={() => onKey(k)}>
+            <button key={k} type="button" className={`${keyBase} w-[4.75rem]`} onClick={() => onKey(k)}>
               {k}
             </button>
           ))}
           {i === 2 && extraKeys.map((k) => (
-            <button key={k} type="button" className={`${keyBase} w-[76px]`} onClick={() => onKey(k)}>
+            <button key={k} type="button" className={`${keyBase} w-[4.75rem]`} onClick={() => onKey(k)}>
               {k}
             </button>
           ))}
         </div>
       ))}
       <div className="flex justify-center gap-2">
-        <button type="button" className={`${keyBase} w-[160px] text-xl`} onClick={onBackspace}>
+        <button type="button" className={`${keyBase} w-[10rem] text-xl`} onClick={onBackspace}>
           Delete
         </button>
-        <button type="button" className={`${keyBase} w-[420px] text-xl`} onClick={onSpace}>
+        <button type="button" className={`${keyBase} w-[26.25rem] text-xl`} onClick={onSpace}>
           Space
         </button>
-        <button type="button" className={`${keyBase} w-[160px] bg-palm text-xl text-white active:bg-palm-deep`} onClick={onDone}>
+        <button type="button" className={`${keyBase} w-[10rem] bg-palm text-xl text-white active:bg-palm-deep`} onClick={onDone}>
           {doneLabel}
         </button>
       </div>
@@ -67,7 +67,7 @@ export function NumberPad({
 }) {
   const keys = ["1", "2", "3", "4", "5", "6", "7", "8", "9"];
   return (
-    <div className="grid w-[360px] grid-cols-3 gap-2 rounded-panel bg-sand p-3" role="group" aria-label="Number pad">
+    <div className="grid w-[22.5rem] grid-cols-3 gap-2 rounded-panel bg-sand p-3" role="group" aria-label="Number pad">
       {keys.map((k) => (
         <button key={k} type="button" className={`${keyBase} text-3xl`} onClick={() => onKey(k)}>
           {k}
