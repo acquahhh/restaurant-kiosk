@@ -7,6 +7,11 @@ import {
 } from "@/lib/paystack";
 import type { PaymentStep } from "./order-input";
 
+/** One readable line per payment step in the server log. Statuses only: never keys, phone numbers or card data. */
+function trace(reference: string, what: string) {
+  console.info(`[payment] ${reference} ${what}`);
+}
+
 const GENERIC_FAIL = "The payment did not go through. Please try again or choose another way to pay.";
 
 /** Paystack's words for a declined charge are often technical; keep only the useful ones. */
@@ -54,17 +59,21 @@ export async function startPaystackPayment(p: {
     if (p.method === "mobile_money") {
       const res = await chargeMobileMoney({ reference: p.reference, amount: p.amount, phone: p.momoPhone!, network: p.momoNetwork!, orderNumber: p.orderNumber });
       if (!res.status) {
+        trace(p.reference, `mobile money refused by Paystack: "${res.message}"`);
         await admin.rpc("fail_payment", { p_reference: p.reference, p_raw: res as never });
         return { stage: "failed", message: friendlyFailure(res.message) };
       }
+      trace(p.reference, `mobile money (${p.momoNetwork}) started: Paystack says "${res.data.status}"`);
       return stepFromCharge(p.reference, res.data, p.momoNetwork!);
     }
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
     const res = await initializeCardPayment({ reference: p.reference, amount: p.amount, orderNumber: p.orderNumber, callbackUrl: `${appUrl}/pay/done` });
     if (!res.status) {
+      trace(p.reference, `card checkout refused by Paystack: "${res.message}"`);
       await admin.rpc("fail_payment", { p_reference: p.reference, p_raw: res as never });
       return { stage: "failed", message: GENERIC_FAIL };
     }
+    trace(p.reference, "card checkout ready: QR shown");
     const qrSvg = await QRCode.toString(res.data.authorization_url, { type: "svg", margin: 1, errorCorrectionLevel: "M", color: { dark: "#1c1b18", light: "#ffffff" } });
     return { stage: "qr", reference: p.reference, qrSvg };
   } catch (e) {
@@ -88,8 +97,12 @@ export async function verifyAndRecord(reference: string): Promise<
   if (payment.status === "failed") return { status: "failed", message: GENERIC_FAIL };
 
   const res = await verifyTransaction(reference);
-  if (!res.status) return { status: "pending" }; // not yet known to Paystack
+  if (!res.status) {
+    trace(reference, `check: Paystack does not know it yet ("${res.message}")`);
+    return { status: "pending" };
+  }
   const tx = res.data;
+  trace(reference, `check: Paystack says "${tx.status}"${tx.gateway_response ? ` (${tx.gateway_response})` : ""}`);
 
   if (tx.status === "success") {
     const { data, error } = await admin.rpc("confirm_payment", {
@@ -123,6 +136,7 @@ export async function verifyAndRecord(reference: string): Promise<
 export async function submitPaymentOtp(reference: string, otp: string): Promise<PaymentStep> {
   try {
     const res = await paystackSubmitOtp(reference, otp);
+    trace(reference, res.status ? `code accepted: Paystack says "${res.data.status}"` : `code refused: "${res.message}"`);
     if (!res.status) return { stage: "otp", reference, message: friendlyFailure(res.message ?? "otp") };
     return stepFromCharge(reference, res.data, "telecel");
   } catch {
