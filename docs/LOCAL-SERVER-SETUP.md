@@ -61,11 +61,17 @@ Use the server's fixed address, e.g. `192.168.1.50`:
 
 On the server PC itself use `http://localhost:3000/...`.
 
-**Status board sound:** after the board starts, tap the bar at the bottom once
-("Tap here to turn on announcements"). Browsers only allow sound after a tap.
-It then says "Order 42, ready for collection" twice when a takeaway order is
-marked ready. If there is no customer screen, use **Call out ready orders** on
-the kitchen display instead, and place its speaker near the counter.
+**Sound on the kitchen and status board (Windows):** start them with
+`scripts\open-kitchen.cmd` and `scripts\open-board.cmd` (add the server
+address when it is another PC, e.g. `open-board.cmd 192.168.1.50`). These open
+Chrome full screen with sound allowed from the start, so nobody has to tap.
+Put shortcuts to them in the Startup folder of the PCs that show those screens.
+Opened any other way, browsers only allow sound after the first touch: the
+screens show a bar asking for one tap, after which sound stays on.
+
+The status board says "Order 42, ready for collection" twice when a takeaway
+order is marked ready. If there is no customer screen, use **Call out ready
+orders** on the kitchen display instead, with its speaker near the counter.
 
 **Android tablets over the local network:** browsers only allow "keep screen
 on" and "install as app" for secure addresses, which a local `http://` address

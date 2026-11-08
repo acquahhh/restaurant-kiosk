@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { announceReady, unlockAnnouncer } from "@/lib/client/announcer";
+import { announceReady, autoUnlock, isAnnouncerUnlocked, onUnlockChange, unlockAnnouncer } from "@/lib/client/announcer";
 
 type Row = { order_number: string; status: string; order_type: "dine_in" | "takeaway"; updated_at: string };
 
@@ -15,8 +15,19 @@ export function BoardView() {
   const [justReady, setJustReady] = useState<Set<string>>(new Set());
   const readyBefore = useRef<Set<string> | null>(null);
   const [soundOn, setSoundOn] = useState(false);
-  const soundRef = useRef(false);
-  soundRef.current = soundOn;
+  const [needsUpdate, setNeedsUpdate] = useState(false);
+
+  // Sound: on without a touch when the browser allows it, else on the first touch anywhere.
+  useEffect(() => {
+    const sync = () => setSoundOn(isAnnouncerUnlocked());
+    const off = onUnlockChange(sync);
+    const cleanup = autoUnlock();
+    sync();
+    return () => {
+      off();
+      cleanup();
+    };
+  }, []);
 
   useEffect(() => {
     let alive = true;
@@ -29,16 +40,16 @@ export function BoardView() {
       }
       setStale(false);
       const list = (data ?? []) as Row[];
+      // Database not updated with 0007: cannot tell takeaway from dine-in.
+      setNeedsUpdate(list.length > 0 && list.every((r) => r.order_type === undefined));
       const readyNow = new Set(list.filter((r) => r.status === "ready").map((r) => r.order_number));
       if (readyBefore.current) {
         const fresh = [...readyNow].filter((n) => !readyBefore.current!.has(n));
         if (fresh.length) {
           setJustReady(new Set(fresh));
           // Say takeaway numbers aloud; dine-in food is brought to the table.
-          if (soundRef.current) {
-            for (const n of fresh) {
-              if (list.find((r) => r.order_number === n)?.order_type === "takeaway") announceReady(n);
-            }
+          for (const n of fresh) {
+            if (list.find((r) => r.order_number === n)?.order_type === "takeaway") announceReady(n);
           }
           window.setTimeout(() => setJustReady(new Set()), 20_000);
         }
@@ -62,14 +73,16 @@ export function BoardView() {
     {!soundOn ? (
       <button
         type="button"
-        onClick={() => {
-          unlockAnnouncer();
-          setSoundOn(true);
-        }}
+        onClick={() => unlockAnnouncer()}
         className="fixed inset-x-0 bottom-0 z-50 bg-ink py-5 text-center text-2xl font-semibold text-white"
       >
         Tap here to turn on announcements for takeaway orders
       </button>
+    ) : null}
+    {needsUpdate ? (
+      <p role="alert" className="fixed inset-x-0 top-0 z-50 bg-pepper py-3 text-center text-xl font-semibold text-white">
+        Announcements need a database update: run supabase/migrations/0007_board_order_type.sql in Supabase.
+      </p>
     ) : null}
     <main className="grid h-dvh grid-cols-2 bg-canvas portrait:grid-cols-1 portrait:grid-rows-2" data-surface="kiosk">
       <section className="flex flex-col bg-sand px-12 py-10">

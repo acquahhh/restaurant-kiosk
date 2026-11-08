@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import type { OrderStatus } from "@/lib/db/database.types";
 import { formatGhs } from "@/lib/money";
 import { signOut } from "../login/actions";
-import { announceReady, unlockAnnouncer } from "@/lib/client/announcer";
+import { announceReady, autoUnlock, chime, isAnnouncerUnlocked, onUnlockChange } from "@/lib/client/announcer";
 
 export interface KitchenOrder {
   id: string;
@@ -41,23 +41,6 @@ function minutesSince(iso: string, now: number) {
   return Math.max(0, Math.floor((now - new Date(iso).getTime()) / 60_000));
 }
 
-/** Two short tones. Needs one tap on "Sound on" first: browsers block audio until then. */
-function playChime(ctx: AudioContext) {
-  const t = ctx.currentTime;
-  [[880, 0], [1320, 0.18]].forEach(([freq, delay]) => {
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.type = "sine";
-    osc.frequency.value = freq!;
-    gain.gain.setValueAtTime(0.0001, t + delay!);
-    gain.gain.exponentialRampToValueAtTime(0.35, t + delay! + 0.02);
-    gain.gain.exponentialRampToValueAtTime(0.0001, t + delay! + 0.35);
-    osc.connect(gain).connect(ctx.destination);
-    osc.start(t + delay!);
-    osc.stop(t + delay! + 0.4);
-  });
-}
-
 export function KitchenBoard({
   initialOrders, restaurantName, staffName, role, soundDefault,
 }: {
@@ -73,13 +56,25 @@ export function KitchenBoard({
   const [now, setNow] = useState(() => Date.now());
   const [busy, setBusy] = useState<Set<string>>(new Set());
   const [error, setError] = useState<string | null>(null);
-  const [soundOn, setSoundOn] = useState(false);
+  // New-order chime is always on (Admin > Settings can disable it); the first
+  // touch on the screen enables sound, or none at all with the autoplay start-up flag.
+  const [soundReady, setSoundReady] = useState(false);
   const [announceOn, setAnnounceOn] = useState(false);
   const [arrivedAt, setArrivedAt] = useState<Map<string, number>>(new Map());
-  const audioRef = useRef<AudioContext | null>(null);
   const known = useRef(new Set(initialOrders.map((o) => o.id)));
-  const soundRef = useRef(soundOn);
-  soundRef.current = soundOn;
+  const soundRef = useRef(soundDefault);
+  soundRef.current = soundDefault;
+
+  useEffect(() => {
+    const sync = () => setSoundReady(isAnnouncerUnlocked());
+    const off = onUnlockChange(sync);
+    const cleanup = autoUnlock();
+    sync();
+    return () => {
+      off();
+      cleanup();
+    };
+  }, []);
 
   const refresh = useCallback(async () => {
     const { data, error: rpcError } = await supabase.rpc("kitchen_orders");
@@ -97,7 +92,7 @@ export function KitchenBoard({
         fresh.forEach((o) => copy.set(o.id, Date.now()));
         return copy;
       });
-      if (soundRef.current && audioRef.current) playChime(audioRef.current);
+      if (soundRef.current) chime("new");
     }
     setOrders(next);
   }, [supabase]);
@@ -167,13 +162,6 @@ export function KitchenBoard({
   };
   const markPaid = (id: string) => run(id, () => supabase.rpc("mark_cash_paid", { p_order_id: id }));
 
-  function toggleSound() {
-    if (!audioRef.current) audioRef.current = new AudioContext();
-    void audioRef.current.resume();
-    const next = !soundOn;
-    setSoundOn(next);
-    if (next) playChime(audioRef.current);
-  }
 
   const byLane = (lane: Lane) => {
     const list = orders.filter((o) => o.status === lane);
@@ -196,18 +184,7 @@ export function KitchenBoard({
         <div className="ml-auto flex items-center gap-3">
           <button
             type="button"
-            onClick={toggleSound}
-            aria-pressed={soundOn}
-            className={`h-11 rounded-lg px-4 text-sm font-semibold ${soundOn ? "bg-white text-slate" : "border border-slate-line text-white/80"}`}
-          >
-            {soundOn ? "Sound on" : soundDefault ? "Tap to turn sound on" : "Sound off"}
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              if (!announceOn) unlockAnnouncer();
-              setAnnounceOn(!announceOn);
-            }}
+            onClick={() => setAnnounceOn(!announceOn)}
             aria-pressed={announceOn}
             title="Speak takeaway order numbers when you mark them ready. Use when there is no customer status screen."
             className={`h-11 rounded-lg px-4 text-sm font-semibold ${announceOn ? "bg-white text-slate" : "border border-slate-line text-white/80"}`}
@@ -226,6 +203,11 @@ export function KitchenBoard({
 
       {error ? (
         <p role="alert" className="shrink-0 bg-pepper px-5 py-2 text-sm font-semibold text-white">{error}</p>
+      ) : null}
+      {soundDefault && !soundReady ? (
+        <p className="shrink-0 bg-status-new px-5 py-2 text-center text-base font-bold text-slate" role="status">
+          Tap anywhere on this screen to turn on the new-order sound
+        </p>
       ) : null}
 
       <main className="flex min-h-0 flex-1 snap-x snap-mandatory gap-3 overflow-x-auto p-3 lg:grid lg:grid-cols-[1fr_1fr_1fr_minmax(240px,0.7fr)] lg:overflow-x-visible">
