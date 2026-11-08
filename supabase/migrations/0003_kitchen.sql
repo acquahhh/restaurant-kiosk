@@ -11,6 +11,7 @@
 -- =============================================================================
 
 drop policy if exists "staff update orders" on public.orders;
+drop policy if exists "managers update orders" on public.orders;   -- safe to re-run
 create policy "managers update orders" on public.orders for update
   using (public.current_role() in ('admin', 'manager'));
 
