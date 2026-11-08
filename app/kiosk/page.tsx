@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { openState } from "@/lib/kiosk/opening-hours";
 import { useRouter } from "next/navigation";
 import { useKiosk } from "@/lib/kiosk/kiosk-session";
 import { formatGhs } from "@/lib/money";
@@ -22,13 +23,21 @@ export default function WelcomeScreen() {
     router.prefetch("/kiosk/menu");
   }, [router]);
 
+  // Re-check every minute so the kiosk opens and closes on its own.
+  const [hours, setHours] = useState(() => openState(settings.opening_hours));
+  useEffect(() => {
+    const id = window.setInterval(() => setHours(openState(settings.opening_hours)), 60_000);
+    return () => window.clearInterval(id);
+  }, [settings.opening_hours]);
+  const closed = hours !== null && !hours.open;
+
   const featured = menu.flatMap((c) => c.items).filter((i) => i.is_featured && i.is_available).slice(0, 3);
   const heroPhoto = featured.find((i) => i.image_url)?.image_url ?? null;
 
   return (
     <main
       className="grid h-full grid-cols-[1.15fr_1fr]"
-      onClick={() => router.push("/kiosk/order-type")}
+      onClick={() => !closed && router.push("/kiosk/order-type")}
     >
       <section className="flex flex-col justify-between bg-palm px-20 py-16 text-white">
         <div className="flex items-center gap-5">
@@ -48,6 +57,12 @@ export default function WelcomeScreen() {
           </p>
         </div>
 
+        {closed ? (
+          <div className="max-w-[560px] rounded-button bg-white/10 px-8 py-6">
+            <p className="text-3xl font-bold">We are closed right now</p>
+            {hours?.opensAt ? <p className="mt-2 text-2xl text-white/80">We open {hours.opensAt}.</p> : null}
+          </div>
+        ) : (
         <Button
           variant="hero"
           size="xl"
@@ -59,6 +74,7 @@ export default function WelcomeScreen() {
         >
           Start order
         </Button>
+        )}
       </section>
 
       <section className="relative flex flex-col bg-sand">

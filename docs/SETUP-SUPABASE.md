@@ -12,6 +12,7 @@ In the dashboard open **SQL Editor** → **New query**. Run these three files fr
 2. `supabase/migrations/0002_place_order.sql`
 3. `supabase/seed.sql`
 4. `supabase/migrations/0003_kitchen.sql`
+5. `supabase/migrations/0004_admin.sql`
 
 Later migrations are always run in number order, once each.
 
@@ -40,7 +41,9 @@ insert into public.profiles (id, full_name, role)
 select id, 'Your Name', 'admin' from auth.users where email = 'you@example.com';
 ```
 
-3. Sign in at http://localhost:3000/login. Staff screens: `/kitchen` (kitchen display) and `/board` (public order status screen, no sign-in).
+3. Sign in at http://localhost:3000/login. Staff screens: `/admin` (dashboard: reports, orders, menu, settings), `/kitchen` (kitchen display) and `/board` (public order status screen, no sign-in).
+
+Roles: `admin` can do everything; `manager` runs the menu, orders, tables and reports but cannot change restaurant settings; `kitchen` sees only the kitchen display.
 
 ## Testing the schema without Supabase
 See `supabase/tests/`: `smoke_test.sql` and `place_order_test.sql` run on plain PostgreSQL after `local_shim.sql`.

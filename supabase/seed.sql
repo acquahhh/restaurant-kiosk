@@ -10,10 +10,7 @@ insert into public.restaurant_settings
    accept_cash, accept_mobile_money, accept_card, default_prep_minutes)
 values
   (1, 'Harbour Kitchen', 'Good Food. Great Moments.', 0, 0,
-   '{"mon":{"open":"08:00","close":"22:00"},"tue":{"open":"08:00","close":"22:00"},
-     "wed":{"open":"08:00","close":"22:00"},"thu":{"open":"08:00","close":"22:00"},
-     "fri":{"open":"08:00","close":"23:00"},"sat":{"open":"09:00","close":"23:00"},
-     "sun":{"open":"11:00","close":"21:00"}}'::jsonb,
+   '{}'::jsonb,  -- opening hours are off until an admin sets them
    90, true, true, false, 15)
 on conflict (id) do nothing;
 

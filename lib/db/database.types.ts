@@ -250,6 +250,8 @@ export type Database = {
       set_order_status: { Args: { p_order_id: string; p_status: OrderStatus }; Returns: OrderRow };
       mark_cash_paid: { Args: { p_order_id: string }; Returns: OrderRow };
       kitchen_orders: { Args: Record<string, never>; Returns: Json };
+      save_menu_item: { Args: { p: Json }; Returns: string };
+      sales_report: { Args: { p_from: string; p_to: string }; Returns: Json };
       order_board: {
         Args: Record<string, never>;
         Returns: { order_number: string; status: OrderStatus; updated_at: string }[];

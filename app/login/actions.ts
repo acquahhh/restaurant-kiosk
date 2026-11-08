@@ -30,7 +30,9 @@ export async function signIn(_prev: SignInState, formData: FormData): Promise<Si
     return { error: "This account has no staff access. Ask the restaurant administrator.", email };
   }
 
-  redirect(safeNext(formData.get("next")));
+  const target = safeNext(formData.get("next"));
+  // Kitchen accounts cannot open admin pages: send them where they can work.
+  redirect(profile.role === "kitchen" && target.startsWith("/admin") ? "/kitchen" : target);
 }
 
 export async function signOut() {
