@@ -27,7 +27,8 @@ export function stepFromCharge(reference: string, data: ChargeData, network: str
       return {
         stage: "otp",
         reference,
-        message: data.display_text ?? "Dial *110# on your phone, choose Make Payments, then Generate Voucher, and enter the code here.",
+        // Paystack's own instruction is specific to the network; prefer it.
+        message: data.display_text ?? "Enter the code sent to your phone. Telecel Cash users: dial *110#, choose Make Payments, then Generate Voucher.",
       };
     case "failed":
       return { stage: "failed", message: friendlyFailure(data.gateway_response ?? data.message) };
@@ -108,7 +109,11 @@ export async function verifyAndRecord(reference: string): Promise<
     }
     return { status: "paid", orderId: payment.order_id };
   }
-  if (tx.status === "failed" || tx.status === "abandoned" || tx.status === "reversed") {
+  // Only "failed" and "reversed" are final. Paystack reports "abandoned" for
+  // any payment the customer has not finished yet (e.g. a card QR not yet
+  // scanned), and "ongoing"/"pending" while it waits: keep waiting. The kiosk's
+  // own time limit decides when to stop.
+  if (tx.status === "failed" || tx.status === "reversed") {
     await admin.rpc("fail_payment", { p_reference: reference, p_raw: tx as never });
     return { status: "failed", message: friendlyFailure(tx.gateway_response) };
   }
