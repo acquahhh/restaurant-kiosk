@@ -258,10 +258,11 @@ export type Database = {
       };
       fail_payment: { Args: { p_reference: string; p_raw: Json }; Returns: undefined };
       expire_unpaid_orders: { Args: { p_minutes?: number }; Returns: number };
+      payments_to_reconcile: { Args: { p_minutes?: number }; Returns: { reference: string }[] };
       sales_report: { Args: { p_from: string; p_to: string }; Returns: Json };
       order_board: {
         Args: Record<string, never>;
-        Returns: { order_number: string; status: OrderStatus; updated_at: string }[];
+        Returns: { order_number: string; status: OrderStatus; order_type: OrderType; updated_at: string }[];
       };
     };
     Enums: {

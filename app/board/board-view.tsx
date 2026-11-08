@@ -2,8 +2,9 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { announceReady, unlockAnnouncer } from "@/lib/client/announcer";
 
-type Row = { order_number: string; status: string; updated_at: string };
+type Row = { order_number: string; status: string; order_type: "dine_in" | "takeaway"; updated_at: string };
 
 const POLL_MS = 4_000;
 
@@ -13,6 +14,9 @@ export function BoardView() {
   const [stale, setStale] = useState(false);
   const [justReady, setJustReady] = useState<Set<string>>(new Set());
   const readyBefore = useRef<Set<string> | null>(null);
+  const [soundOn, setSoundOn] = useState(false);
+  const soundRef = useRef(false);
+  soundRef.current = soundOn;
 
   useEffect(() => {
     let alive = true;
@@ -30,6 +34,12 @@ export function BoardView() {
         const fresh = [...readyNow].filter((n) => !readyBefore.current!.has(n));
         if (fresh.length) {
           setJustReady(new Set(fresh));
+          // Say takeaway numbers aloud; dine-in food is brought to the table.
+          if (soundRef.current) {
+            for (const n of fresh) {
+              if (list.find((r) => r.order_number === n)?.order_type === "takeaway") announceReady(n);
+            }
+          }
           window.setTimeout(() => setJustReady(new Set()), 20_000);
         }
       }
@@ -48,6 +58,19 @@ export function BoardView() {
   const ready = rows?.filter((r) => r.status === "ready") ?? [];
 
   return (
+    <>
+    {!soundOn ? (
+      <button
+        type="button"
+        onClick={() => {
+          unlockAnnouncer();
+          setSoundOn(true);
+        }}
+        className="fixed inset-x-0 bottom-0 z-50 bg-ink py-5 text-center text-2xl font-semibold text-white"
+      >
+        Tap here to turn on announcements for takeaway orders
+      </button>
+    ) : null}
     <main className="grid h-dvh grid-cols-2 bg-canvas portrait:grid-cols-1 portrait:grid-rows-2" data-surface="kiosk">
       <section className="flex flex-col bg-sand px-12 py-10">
         <h1 className="text-5xl font-extrabold tracking-tight">Preparing</h1>
@@ -79,5 +102,6 @@ export function BoardView() {
         </p>
       ) : null}
     </main>
+    </>
   );
 }

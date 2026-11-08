@@ -71,7 +71,7 @@ export function submitOtp(reference: string, otp: string) {
   return call<ChargeData>("/charge/submit_otp", { method: "POST", body: { reference, otp } });
 }
 
-export function initializeCardPayment(p: { reference: string; amount: number; callbackUrl: string; orderNumber: string }) {
+export function initializeCardPayment(p: { reference: string; amount: number; callbackUrl?: string; orderNumber: string }) {
   return call<{ authorization_url: string; access_code: string; reference: string }>("/transaction/initialize", {
     method: "POST",
     body: {
@@ -80,7 +80,9 @@ export function initializeCardPayment(p: { reference: string; amount: number; ca
       currency: "GHS",
       reference: p.reference,
       channels: ["card"],
-      callback_url: p.callbackUrl,
+      // Only when the app has a public https address; otherwise Paystack shows
+      // its own confirmation on the customer's phone.
+      ...(p.callbackUrl ? { callback_url: p.callbackUrl } : {}),
       metadata: { order_number: p.orderNumber, source: "kiosk" },
     },
   });

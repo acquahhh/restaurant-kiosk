@@ -66,8 +66,10 @@ export async function startPaystackPayment(p: {
       trace(p.reference, `mobile money (${p.momoNetwork}) started: Paystack says "${res.data.status}"`);
       return stepFromCharge(p.reference, res.data, p.momoNetwork!);
     }
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-    const res = await initializeCardPayment({ reference: p.reference, amount: p.amount, orderNumber: p.orderNumber, callbackUrl: `${appUrl}/pay/done` });
+    // A customer's phone cannot open an address inside the restaurant's network.
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "";
+    const callbackUrl = appUrl.startsWith("https://") ? `${appUrl}/pay/done` : undefined;
+    const res = await initializeCardPayment({ reference: p.reference, amount: p.amount, orderNumber: p.orderNumber, callbackUrl });
     if (!res.status) {
       trace(p.reference, `card checkout refused by Paystack: "${res.message}"`);
       await admin.rpc("fail_payment", { p_reference: p.reference, p_raw: res as never });

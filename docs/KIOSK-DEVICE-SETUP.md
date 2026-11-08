@@ -4,7 +4,9 @@ The kiosk works on any touchscreen with a current Chrome or Edge browser:
 Windows touch PCs and all-in-ones, Android tablets, landscape or portrait.
 Everything scales to the screen; portrait screens get their own layout.
 
-Replace `https://YOUR-DOMAIN` below with the address the app is deployed to.
+Replace `https://YOUR-DOMAIN` below with the server's local address, e.g.
+`http://192.168.1.50:3000`, or `http://localhost:3000` on the server PC
+itself (see LOCAL-SERVER-SETUP.md: the system is not on the internet).
 
 | Screen | URL |
 |---|---|
@@ -67,7 +69,7 @@ Such apps are usually free to try with a paid licence per device.
 
 ## Kitchen and status-board screens
 - **Kitchen tablet or monitor**: open `/kitchen`, sign in with a kitchen account, then tap **Tap to turn sound on** once (browsers only allow sound after a tap). Use Option A above to make it full screen; do not pin it if staff also need the tablet for other apps.
-- **Status board TV**: any TV or monitor with a browser (or a small PC / streaming stick with Chrome) opened on `/board`, full screen (F11 on a PC). No sign-in needed; it shows order numbers only.
+- **Status board TV**: any TV or monitor with a browser (or a small PC / streaming stick with Chrome) opened on `/board`, full screen (F11 on a PC). No sign-in needed; it shows order numbers only. Tap the bar at the bottom once after it starts to turn on spoken announcements ("Order 42, ready for collection") for takeaway orders; connect it to speakers loud enough for the waiting area.
 
 ## Daily start-up checklist
 1. Turn on the kiosk, kitchen screen and status board.

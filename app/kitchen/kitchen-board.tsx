@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import type { OrderStatus } from "@/lib/db/database.types";
 import { formatGhs } from "@/lib/money";
 import { signOut } from "../login/actions";
+import { announceReady, unlockAnnouncer } from "@/lib/client/announcer";
 
 export interface KitchenOrder {
   id: string;
@@ -73,6 +74,7 @@ export function KitchenBoard({
   const [busy, setBusy] = useState<Set<string>>(new Set());
   const [error, setError] = useState<string | null>(null);
   const [soundOn, setSoundOn] = useState(false);
+  const [announceOn, setAnnounceOn] = useState(false);
   const [arrivedAt, setArrivedAt] = useState<Map<string, number>>(new Map());
   const audioRef = useRef<AudioContext | null>(null);
   const known = useRef(new Set(initialOrders.map((o) => o.id)));
@@ -157,8 +159,12 @@ export function KitchenBoard({
     });
   }
 
-  const setStatus = (id: string, to: OrderStatus) =>
-    run(id, () => supabase.rpc("set_order_status", { p_order_id: id, p_status: to }), to);
+  const setStatus = (id: string, to: OrderStatus) => {
+    // Optional: this screen calls takeaway numbers itself (no customer status board).
+    const order = orders.find((o) => o.id === id);
+    if (announceOn && to === "ready" && order?.order_type === "takeaway") announceReady(order.order_number);
+    return run(id, () => supabase.rpc("set_order_status", { p_order_id: id, p_status: to }), to);
+  };
   const markPaid = (id: string) => run(id, () => supabase.rpc("mark_cash_paid", { p_order_id: id }));
 
   function toggleSound() {
@@ -195,6 +201,18 @@ export function KitchenBoard({
             className={`h-11 rounded-lg px-4 text-sm font-semibold ${soundOn ? "bg-white text-slate" : "border border-slate-line text-white/80"}`}
           >
             {soundOn ? "Sound on" : soundDefault ? "Tap to turn sound on" : "Sound off"}
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              if (!announceOn) unlockAnnouncer();
+              setAnnounceOn(!announceOn);
+            }}
+            aria-pressed={announceOn}
+            title="Speak takeaway order numbers when you mark them ready. Use when there is no customer status screen."
+            className={`h-11 rounded-lg px-4 text-sm font-semibold ${announceOn ? "bg-white text-slate" : "border border-slate-line text-white/80"}`}
+          >
+            {announceOn ? "Calling out ready orders" : "Call out ready orders"}
           </button>
           <span className="hidden text-sm text-white/60 sm:inline">{staffName}</span>
           {role !== "kitchen" ? (
