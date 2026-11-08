@@ -69,7 +69,6 @@ export type MenuItemRow = {
   name: string;
   description: string;
   image_url: string | null;
-  image_credit: string | null;
   base_price: number;
   is_available: boolean;
   is_featured: boolean;
@@ -208,7 +207,7 @@ export type Database = {
       >;
       menu_items: Table<
         MenuItemRow,
-        | "id" | "description" | "image_url" | "image_credit" | "is_available" | "is_featured" | "is_popular"
+        | "id" | "description" | "image_url" | "is_available" | "is_featured" | "is_popular"
         | "prep_minutes" | "sort_order" | "created_at" | "updated_at"
       >;
       customization_groups: Table<

@@ -9,12 +9,7 @@ const nextConfig: NextConfig = {
   images: {
     // Food photos and the logo are served from the Supabase "menu-images" bucket.
     remotePatterns: supabaseHost
-      ? [{
-          // https on Supabase; http only for a local development stack
-          protocol: process.env.NEXT_PUBLIC_SUPABASE_URL!.startsWith("http://") ? "http" : "https",
-          hostname: supabaseHost,
-          pathname: "/storage/v1/object/public/**",
-        }]
+      ? [{ protocol: "https", hostname: supabaseHost, pathname: "/storage/v1/object/public/**" }]
       : [],
   },
 };
