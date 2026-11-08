@@ -1,10 +1,10 @@
 "use client";
 
 import { useKiosk } from "@/lib/kiosk/kiosk-session";
-import { formatGhs } from "@/lib/money";
+import { formatMoney } from "@/lib/money";
 
 function percent(bp: number) {
-  return `${(bp / 100).toLocaleString("en-GH", { maximumFractionDigits: 2 })}%`;
+  return `${(bp / 100).toLocaleString("en-GB", { maximumFractionDigits: 2 })}%`;
 }
 
 /** Subtotal, tax and service lines appear only when the restaurant charges them. */
@@ -17,25 +17,25 @@ export function TotalsTable() {
         <>
           <div className="flex justify-between">
             <dt>Subtotal</dt>
-            <dd className="tabular-nums">{formatGhs(totals.subtotal)}</dd>
+            <dd className="tabular-nums">{formatMoney(totals.subtotal)}</dd>
           </div>
           {totals.taxAmount > 0 ? (
             <div className="flex justify-between text-ink-muted">
               <dt>Tax ({percent(settings.tax_rate_bp)})</dt>
-              <dd className="tabular-nums">{formatGhs(totals.taxAmount)}</dd>
+              <dd className="tabular-nums">{formatMoney(totals.taxAmount)}</dd>
             </div>
           ) : null}
           {totals.serviceCharge > 0 ? (
             <div className="flex justify-between text-ink-muted">
               <dt>Service charge ({percent(settings.service_charge_bp)})</dt>
-              <dd className="tabular-nums">{formatGhs(totals.serviceCharge)}</dd>
+              <dd className="tabular-nums">{formatMoney(totals.serviceCharge)}</dd>
             </div>
           ) : null}
         </>
       ) : null}
       <div className={`flex items-baseline justify-between ${showBreakdown ? "border-t border-sand-deep pt-4" : ""}`}>
         <dt className="font-semibold">Total</dt>
-        <dd className="price">{formatGhs(totals.total)}</dd>
+        <dd className="price">{formatMoney(totals.total)}</dd>
       </div>
     </dl>
   );

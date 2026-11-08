@@ -17,6 +17,7 @@ In the dashboard open **SQL Editor** → **New query**. Run these three files fr
 7. `supabase/migrations/0007_board_order_type.sql`
 8. `supabase/migrations/0008_hardening.sql`
 9. `supabase/migrations/0009_branding.sql`
+10. `supabase/migrations/0010_country.sql`
 
 Later migrations are always run in number order. Each one is safe to run again.
 
@@ -65,3 +66,20 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 Paystack needs an email for every charge; kiosk customers do not give one, so receipts go to `PAYSTACK_ORDER_EMAIL`, tagged per order.
 In test mode no real phone gets a prompt: use the test Mobile Money numbers and test cards from https://paystack.com/docs/payments/test-payments/.
 After deployment, set the webhook URL in Paystack to `https://<your-domain>/api/webhooks/paystack`. Until then the kiosk confirms payments by asking Paystack directly, which is enough for testing.
+
+## Country
+Each installation serves one restaurant in one country: Ghana (`GH`), Rwanda
+(`RW`) or Kenya (`KE`). Set it in two places, once, before taking orders:
+
+1. `.env.local`: `NEXT_PUBLIC_COUNTRY=RW` (then rebuild: `npm run build`).
+2. Supabase SQL Editor (example for Rwanda):
+   ```sql
+   update public.restaurant_settings set country = 'RW', time_zone = 'Africa/Kigali', currency = 'RWF';
+   ```
+   Ghana: `'GH', 'Africa/Accra', 'GHS'`. Kenya: `'KE', 'Africa/Nairobi', 'KES'`.
+
+If the two disagree, the kiosk stops taking orders and Admin shows a red notice.
+Prices are whole units of the smallest coin: pesewas (Ghana), cents (Kenya),
+francs (Rwanda, no cents), so set the country **before** entering menu prices.
+Payment methods appear only where a provider is ready: Ghana (Paystack) now;
+Rwanda after the Intouch connection; Kenya after M-PESA is added.

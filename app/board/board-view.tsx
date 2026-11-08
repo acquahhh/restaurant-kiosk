@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { formatTime } from "@/lib/time";
 import { announceReady, autoUnlock, isAnnouncerUnlocked, onUnlockChange, unlockAnnouncer } from "@/lib/client/announcer";
 
 type Row = { order_number: string; status: string; order_type: "dine_in" | "takeaway"; updated_at: string };
@@ -18,7 +19,7 @@ export function BoardView({ restaurantName, logoUrl }: { restaurantName: string;
   const [needsUpdate, setNeedsUpdate] = useState(false);
   const [clock, setClock] = useState("");
   useEffect(() => {
-    const tick = () => setClock(new Date().toLocaleTimeString("en-GH", { hour: "2-digit", minute: "2-digit", timeZone: "Africa/Accra" }));
+    const tick = () => setClock(formatTime(new Date()));
     tick();
     const id = window.setInterval(tick, 15_000);
     return () => window.clearInterval(id);

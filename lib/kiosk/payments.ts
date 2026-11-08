@@ -3,7 +3,7 @@ import QRCode from "qrcode";
 import { createAdminClient } from "@/lib/supabase/admin";
 import {
   chargeMobileMoney, initializeCardPayment, submitOtp as paystackSubmitOtp, verifyTransaction,
-  type ChargeData, type MOMO_PROVIDER,
+  type ChargeData,
 } from "@/lib/paystack";
 import type { PaymentStep } from "./order-input";
 
@@ -52,7 +52,7 @@ export function stepFromCharge(reference: string, data: ChargeData, network: str
 
 export async function startPaystackPayment(p: {
   reference: string; amount: number; orderNumber: string;
-  method: "mobile_money" | "card"; momoPhone?: string; momoNetwork?: keyof typeof MOMO_PROVIDER | null;
+  method: "mobile_money" | "card"; momoPhone?: string; momoNetwork?: string | null;
 }): Promise<PaymentStep> {
   const admin = createAdminClient();
   try {

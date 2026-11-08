@@ -3,7 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useRef, useState, useTransition } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { formatGhs, parseGhs } from "@/lib/money";
+import { formatMoney, parseMoney, toInputText } from "@/lib/money";
+import { COUNTRY } from "@/lib/countries";
 import { deleteItem, saveItem, type ItemInput } from "../actions";
 import { btnDanger, btnPrimary, btnSecondary, input } from "../../ui";
 
@@ -12,7 +13,7 @@ type Group = { id?: string; key?: string; name: string; selection_type: "single"
 export type EditorItem = Omit<ItemInput, "groups"> & { groups: Group[] };
 
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
-const cedis = (p: number) => (p / 100).toFixed(2);
+const cedis = (p: number) => toInputText(p);
 let keySeq = 0;
 const newKey = () => `new-${++keySeq}`;
 
@@ -22,7 +23,7 @@ function MoneyInput({ value, onChange, label, allowNegative = false }: { value: 
   const [bad, setBad] = useState(false);
   return (
     <div className="relative">
-      <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-muted">GH₵</span>
+      <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-muted">{COUNTRY.currency.symbol}</span>
       <input
         inputMode="decimal"
         aria-label={label}
@@ -32,7 +33,7 @@ function MoneyInput({ value, onChange, label, allowNegative = false }: { value: 
           setText(t);
           const negative = allowNegative && t.trim().startsWith("-");
           try {
-            const p = parseGhs(t.replace("-", ""));
+            const p = parseMoney(t.replace("-", ""));
             setBad(false);
             onChange(negative ? -p : p);
           } catch {
@@ -41,7 +42,7 @@ function MoneyInput({ value, onChange, label, allowNegative = false }: { value: 
           }
         }}
         onBlur={() => !bad && setText((allowNegative && value < 0 ? "-" : "") + cedis(Math.abs(value)))}
-        className={`${input} pl-12 tabular-nums ${bad ? "border-pepper" : ""}`}
+        className={`${input} pl-14 tabular-nums ${bad ? "border-pepper" : ""}`}
       />
     </div>
   );
@@ -247,7 +248,7 @@ export function ItemEditor({ initial, categories }: { initial: EditorItem; categ
 
         <section className="rounded-xl border border-sand-deep p-4">
           <p className="text-sm text-ink-muted">Kiosk price</p>
-          <p className="text-2xl font-bold tabular-nums">{Number.isFinite(item.base_price) ? formatGhs(item.base_price) : "Check the price"}</p>
+          <p className="text-2xl font-bold tabular-nums">{Number.isFinite(item.base_price) ? formatMoney(item.base_price) : "Check the price"}</p>
           {notice ? <p role="status" className={`mt-3 rounded-lg p-3 text-sm font-semibold ${notice.ok ? "bg-palm-soft text-palm" : "bg-pepper-soft text-pepper"}`}>{notice.text}</p> : null}
           <button type="button" className={`${btnPrimary} mt-4 w-full`} disabled={pending || uploading} onClick={save}>{pending ? "Saving" : "Save meal"}</button>
           {item.id ? (

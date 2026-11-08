@@ -1,10 +1,12 @@
 import "server-only";
 import crypto from "node:crypto";
+import { COUNTRY } from "@/lib/countries";
+import { providerCode } from "@/lib/kiosk/phone";
 
 /**
  * Paystack, server side only. The secret key never leaves the server.
  * API reference: https://paystack.com/docs/api/
- * All amounts are in pesewas, currency GHS.
+ * Amounts are in the currency's smallest unit; currency from the installation's country.
  */
 
 const BASE = process.env.PAYSTACK_API_BASE ?? "https://api.paystack.co";
@@ -50,18 +52,17 @@ async function call<T>(path: string, init?: { method?: "GET" | "POST"; body?: un
 export type ChargeStatus = "pay_offline" | "send_otp" | "success" | "failed" | "pending" | "ongoing" | string;
 export interface ChargeData { status: ChargeStatus; reference: string; display_text?: string; gateway_response?: string; message?: string }
 
-/** Paystack's mobile_money.provider codes for Ghana. */
-export const MOMO_PROVIDER = { mtn: "mtn", telecel: "vod", airteltigo: "atl" } as const;
-
-export function chargeMobileMoney(p: { reference: string; amount: number; phone: string; network: keyof typeof MOMO_PROVIDER; orderNumber: string }) {
+export function chargeMobileMoney(p: { reference: string; amount: number; phone: string; network: string; orderNumber: string }) {
+  const provider = providerCode(p.network);
+  if (!provider) throw new Error(`Unknown mobile money network: ${p.network}`);
   return call<ChargeData>("/charge", {
     method: "POST",
     body: {
       email: orderEmail(p.reference),
       amount: p.amount,
-      currency: "GHS",
+      currency: COUNTRY.currency.code,
       reference: p.reference,
-      mobile_money: { phone: p.phone, provider: MOMO_PROVIDER[p.network] },
+      mobile_money: { phone: p.phone, provider },
       metadata: { order_number: p.orderNumber, source: "kiosk" },
     },
   });
@@ -77,7 +78,7 @@ export function initializeCardPayment(p: { reference: string; amount: number; ca
     body: {
       email: orderEmail(p.reference),
       amount: p.amount,
-      currency: "GHS",
+      currency: COUNTRY.currency.code,
       reference: p.reference,
       channels: ["card"],
       // Only when the app has a public https address; otherwise Paystack shows

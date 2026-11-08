@@ -25,6 +25,8 @@ export const fixtureSettings: RestaurantSettingsRow = {
   kitchen_sound_enabled: true,
   brand_primary: "#16603a",
   brand_accent: "#f2b134",
+  country: "GH",
+  time_zone: "Africa/Accra",
   updated_at: NOW,
 };
 

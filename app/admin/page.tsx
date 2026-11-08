@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { requireStaff } from "@/lib/admin/auth";
-import { formatGhs } from "@/lib/money";
+import { localDate, minusDays } from "@/lib/time";
+import { COUNTRY } from "@/lib/countries";
+import { formatMoney } from "@/lib/money";
 import { PageHeader } from "./ui";
 
 interface Report {
@@ -19,19 +21,14 @@ const RANGES = [
   { key: "month", label: "This month" },
 ] as const;
 
-// Ghana is on GMT all year, so the restaurant date is the UTC date.
-function isoDate(d: Date) {
-  return d.toISOString().slice(0, 10);
-}
+// Ranges use the restaurant's own calendar day (its time zone, not UTC).
 function rangeFor(key: string): { from: string; to: string } {
-  const today = new Date();
-  const to = isoDate(today);
-  const back = (n: number) => isoDate(new Date(today.getTime() - n * 86_400_000));
+  const to = localDate();
   switch (key) {
     case "today": return { from: to, to };
-    case "30d": return { from: back(29), to };
+    case "30d": return { from: minusDays(to, 29), to };
     case "month": return { from: `${to.slice(0, 8)}01`, to };
-    default: return { from: back(6), to };
+    default: return { from: minusDays(to, 6), to };
   }
 }
 
@@ -81,7 +78,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
   const report = data as unknown as Report | null;
 
   const rangeLabel = RANGES.find((r) => r.key === range)?.label ?? "Last 7 days";
-  const shortDate = (iso: string) => new Date(`${iso}T12:00:00Z`).toLocaleDateString("en-GH", { day: "numeric", month: "short", timeZone: "UTC" });
+  const shortDate = (iso: string) => new Date(`${iso}T12:00:00Z`).toLocaleDateString(COUNTRY.locale, { day: "numeric", month: "short", timeZone: "UTC" });
 
   return (
     <>
@@ -116,12 +113,12 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
       ) : (
         <div className="space-y-6">
           <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
-            <Stat label="Sales" value={formatGhs(report.summary.revenue)} note={`${rangeLabel.toLowerCase()}`} />
+            <Stat label="Sales" value={formatMoney(report.summary.revenue)} note={`${rangeLabel.toLowerCase()}`} />
             <Stat label="Orders" value={String(report.summary.orders)} note={report.summary.cancelled ? `${report.summary.cancelled} cancelled, not counted` : undefined} />
-            <Stat label="Average order" value={formatGhs(report.summary.average)} />
+            <Stat label="Average order" value={formatMoney(report.summary.average)} />
             <Stat
               label="Not yet paid"
-              value={formatGhs(report.summary.unpaid)}
+              value={formatMoney(report.summary.unpaid)}
               note={report.summary.unpaid > 0 ? "Cash orders not marked paid" : "Everything is paid"}
             />
           </div>
@@ -141,7 +138,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
                 ) : (
                   <Bars
                     data={report.by_day.map((d) => ({ label: shortDate(d.date), value: d.revenue, title: `${shortDate(d.date)}, ${d.orders} orders` }))}
-                    format={formatGhs}
+                    format={formatMoney}
                   />
                 )}
               </div>
@@ -157,7 +154,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
                     <div key={t}>
                       <div className="flex justify-between text-sm">
                         <span className="font-semibold">{t === "dine_in" ? "Dine in" : "Takeaway"}</span>
-                        <span className="tabular-nums text-ink-muted">{row?.orders ?? 0} orders, {formatGhs(row?.revenue ?? 0)}</span>
+                        <span className="tabular-nums text-ink-muted">{row?.orders ?? 0} orders, {formatMoney(row?.revenue ?? 0)}</span>
                       </div>
                       <div className="mt-1.5 h-2.5 rounded-full bg-sand">
                         <div className="h-2.5 rounded-full bg-palm" style={{ width: `${share}%` }} />
@@ -174,7 +171,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
                     <tr key={p.method} className="border-t border-sand-deep">
                       <td className="py-2 font-semibold">{METHOD_LABEL[p.method] ?? p.method}</td>
                       <td className="py-2 text-right tabular-nums">{p.orders}</td>
-                      <td className="py-2 text-right tabular-nums">{formatGhs(p.revenue)}</td>
+                      <td className="py-2 text-right tabular-nums">{formatMoney(p.revenue)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -214,7 +211,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
                   <tr key={i.name} className="border-t border-sand-deep">
                     <td className="py-2 font-semibold">{i.name}</td>
                     <td className="py-2 text-right tabular-nums">{i.quantity}</td>
-                    <td className="py-2 text-right tabular-nums">{formatGhs(i.revenue)}</td>
+                    <td className="py-2 text-right tabular-nums">{formatMoney(i.revenue)}</td>
                   </tr>
                 ))}
               </tbody>

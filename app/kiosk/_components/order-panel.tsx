@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useKiosk } from "@/lib/kiosk/kiosk-session";
 import { lineTotal, type CartLine } from "@/lib/kiosk/cart";
-import { formatGhs } from "@/lib/money";
+import { formatMoney } from "@/lib/money";
 import { Button, Stepper } from "./ui";
 
 export function orderTypeLabel(orderType: string | null, table: string | null, name: string) {
@@ -54,7 +54,7 @@ export function OrderPanel({ onEdit }: { onEdit: (line: CartLine) => void }) {
                 <button type="button" className="block w-full text-left" onClick={() => onEdit(line)}>
                   <span className="flex items-baseline justify-between gap-4">
                     <span className="text-xl font-bold leading-tight">{line.name}</span>
-                    <span className="shrink-0 text-xl font-bold tabular-nums">{formatGhs(lineTotal(line))}</span>
+                    <span className="shrink-0 text-xl font-bold tabular-nums">{formatMoney(lineTotal(line))}</span>
                   </span>
                   {line.optionSummary.length > 0 || line.instructions ? (
                     <span className="mt-1 block text-base leading-snug text-ink-muted">
@@ -89,7 +89,7 @@ export function OrderPanel({ onEdit }: { onEdit: (line: CartLine) => void }) {
       <div className="border-t border-sand-deep px-8 pb-8 pt-5 portrait:flex portrait:items-center portrait:gap-8 portrait:border-t-0 portrait:py-5">
         <div className="flex items-baseline justify-between gap-4">
           <span className="text-xl font-semibold">Total</span>
-          <span className="price">{formatGhs(totals.total)}</span>
+          <span className="price">{formatMoney(totals.total)}</span>
         </div>
         <Button
           variant="hero"

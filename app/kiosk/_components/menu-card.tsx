@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import type { MenuItem } from "@/lib/db/menu";
-import { formatGhs } from "@/lib/money";
+import { formatMoney } from "@/lib/money";
 import { FoodImage } from "./food-image";
 import { CheckIcon, PlusIcon } from "./ui";
 
@@ -53,14 +53,14 @@ export function MenuCard({
           onClick={onOpen}
           disabled={soldOut}
           className={`flex flex-1 flex-col px-6 pt-6 text-left disabled:cursor-not-allowed ${badge && !item.image_url ? "pt-14" : ""}`}
-          aria-label={`${item.name}, ${formatGhs(item.base_price)}${soldOut ? ", sold out" : ""}`}
+          aria-label={`${item.name}, ${formatMoney(item.base_price)}${soldOut ? ", sold out" : ""}`}
         >
           <h3 className={`${wide ? "text-3xl" : "text-2xl"} font-bold leading-tight tracking-tight`}>{item.name}</h3>
           <p className="mt-2 line-clamp-3 text-lg leading-snug text-ink-muted">{item.description}</p>
         </button>
         {/* Price and Add share one row in normal flow: they can never overlap, and the price never wraps. */}
         <div className="flex items-center justify-between gap-3 px-6 pb-5 pt-4">
-          <span className="whitespace-nowrap text-[1.375rem] font-extrabold tabular-nums tracking-tight">{formatGhs(item.base_price)}</span>
+          <span className="whitespace-nowrap text-[1.375rem] font-extrabold tabular-nums tracking-tight">{formatMoney(item.base_price)}</span>
           {soldOut ? (
             <span className="whitespace-nowrap rounded-button bg-sand px-4 py-3 text-lg font-semibold text-ink-muted">Sold out</span>
           ) : (

@@ -6,7 +6,7 @@ import {
   defaultSelections, MAX_INSTRUCTIONS_LENGTH, MAX_QUANTITY_PER_LINE, toggleOption,
   unitPriceFor, validateSelections, type Selections,
 } from "@/lib/kiosk/cart";
-import { formatGhs } from "@/lib/money";
+import { formatMoney } from "@/lib/money";
 import { FoodImage } from "./food-image";
 import { LetterKeyboard } from "./keyboard";
 import { Button, CheckIcon, CloseIcon, Dialog, Stepper } from "./ui";
@@ -67,7 +67,7 @@ export function CustomizeSheet({
               {item.name}
             </h2>
             <p className="mt-4 text-xl leading-relaxed text-ink-muted">{item.description}</p>
-            <p className="price mt-6">{formatGhs(item.base_price)}</p>
+            <p className="price mt-6">{formatMoney(item.base_price)}</p>
             {item.prep_minutes ? (
               <p className="mt-2 text-lg text-ink-muted">Ready in about {item.prep_minutes} minutes</p>
             ) : null}
@@ -128,9 +128,9 @@ export function CustomizeSheet({
                               {!option.is_available
                                 ? "Sold out"
                                 : option.price_delta > 0
-                                  ? `+ ${formatGhs(option.price_delta)}`
+                                  ? `+ ${formatMoney(option.price_delta)}`
                                   : option.price_delta < 0
-                                    ? `− ${formatGhs(-option.price_delta)}`
+                                    ? `− ${formatMoney(-option.price_delta)}`
                                     : "No extra cost"}
                             </span>
                           </span>
@@ -181,7 +181,7 @@ export function CustomizeSheet({
             <Stepper value={quantity} onChange={setQuantity} max={MAX_QUANTITY_PER_LINE} label="quantity" />
             <Button variant="hero" size="lg" className="flex-1 justify-between" onClick={confirm}>
               <span>{mode === "add" ? "Add to order" : "Update order"}</span>
-              <span className="tabular-nums">{formatGhs(unitPrice * quantity)}</span>
+              <span className="tabular-nums">{formatMoney(unitPrice * quantity)}</span>
             </Button>
           </footer>
         </div>

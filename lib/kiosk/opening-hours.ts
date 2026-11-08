@@ -1,4 +1,6 @@
-/** Opening hours stored as {"mon":{"open":"08:00","close":"22:00"}, "sun": null, ...}. Ghana is GMT all year. */
+import { COUNTRY } from "@/lib/countries";
+import { localDayAndMinutes } from "@/lib/time";
+/** Opening hours stored as {"mon":{"open":"08:00","close":"22:00"}, "sun": null, ...}. Times are in the restaurant's own time zone. */
 export const DAYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] as const;
 export type Day = (typeof DAYS)[number];
 export type Hours = Partial<Record<Day, { open: string; close: string } | null>>;
@@ -10,11 +12,10 @@ const toMinutes = (hhmm: string) => {
 };
 
 /** Returns null when hours are not configured (the kiosk is then always open). */
-export function openState(hours: unknown, now = new Date()): { open: boolean; opensAt?: string } | null {
+export function openState(hours: unknown, now = new Date(), timeZone = COUNTRY.timeZone): { open: boolean; opensAt?: string } | null {
   if (!hours || typeof hours !== "object" || Object.keys(hours).length === 0) return null;
   const h = hours as Hours;
-  const dayIndex = (now.getUTCDay() + 6) % 7; // Monday = 0
-  const minutes = now.getUTCHours() * 60 + now.getUTCMinutes();
+  const { day: dayIndex, minutes } = localDayAndMinutes(now, timeZone); // Monday = 0
   const today = h[DAYS[dayIndex]!];
   if (today) {
     const o = toMinutes(today.open), c = toMinutes(today.close);

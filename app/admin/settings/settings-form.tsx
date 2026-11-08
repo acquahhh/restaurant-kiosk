@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import type { RestaurantSettingsRow } from "@/lib/db/database.types";
 import { DAYS, DAY_LABEL, type Hours } from "@/lib/kiosk/opening-hours";
 import { BRAND_PRESETS, DEFAULT_BRAND, checkBrand } from "@/lib/branding";
+import { COUNTRY } from "@/lib/countries";
 import { saveSettings, type SettingsInput } from "./actions";
 import { btnPrimary, btnSecondary, input } from "../ui";
 
@@ -168,7 +169,7 @@ export function SettingsForm({ settings, canEdit }: { settings: RestaurantSettin
         </div>
         <p className="mt-2 text-sm text-ink-muted">Both are added on top of menu prices and shown as separate lines. Set 0 if prices already include them.</p>
         <div className="mt-4 space-y-2">
-          {([["accept_mobile_money", "Mobile Money (MTN MoMo, Telecel Cash, AT Money)"], ["accept_card", "Card"], ["accept_cash", "Pay at the counter (cash)"]] as const).map(([k, label]) => (
+          {([["accept_mobile_money", `Mobile Money (${COUNTRY.mobileMoney.networks.map((n) => n.label).join(", ")})${COUNTRY.mobileMoney.ready ? "" : " - not available in " + COUNTRY.name + " yet"}`], ["accept_card", `Card${COUNTRY.card.ready ? "" : " - not available in " + COUNTRY.name + " yet"}`], ["accept_cash", "Pay at the counter (cash)"]] as const).map(([k, label]) => (
             <label key={k} className="flex items-center gap-3 font-semibold">
               <input type="checkbox" checked={s[k]} onChange={(e) => set(k, e.target.checked)} className="h-5 w-5 accent-[var(--color-palm)]" />{label}
             </label>

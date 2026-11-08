@@ -4,10 +4,11 @@ import { useEffect, useState } from "react";
 import { openState } from "@/lib/kiosk/opening-hours";
 import { useRouter } from "next/navigation";
 import { useKiosk } from "@/lib/kiosk/kiosk-session";
-import { formatGhs } from "@/lib/money";
+import { formatMoney } from "@/lib/money";
 import { Button } from "./_components/ui";
 import { FoodImage } from "./_components/food-image";
 import { enterFullscreen } from "./_components/device-guard";
+import { COUNTRY } from "@/lib/countries";
 
 export default function WelcomeScreen() {
   const router = useRouter();
@@ -45,8 +46,8 @@ export default function WelcomeScreen() {
   }, [photoItems.length]);
 
   const payWith = [
-    settings.accept_mobile_money && "Mobile Money",
-    settings.accept_card && "Card",
+    settings.accept_mobile_money && COUNTRY.mobileMoney.ready && "Mobile Money",
+    settings.accept_card && COUNTRY.card.ready && "Card",
     settings.accept_cash && "Cash at the counter",
   ].filter(Boolean) as string[];
 
@@ -118,7 +119,7 @@ export default function WelcomeScreen() {
                 <FoodImage src={item.image_url} alt={item.name} sizes="45vw" className={`absolute inset-0 ${i === slide ? "scale-105" : "scale-100"} transition-transform duration-[7000ms] ease-out`} />
                 <div className="absolute inset-x-8 bottom-8 flex items-end justify-between gap-6 rounded-card bg-ink/70 px-7 py-5 text-white backdrop-blur-sm">
                   <span className="text-3xl font-bold leading-tight tracking-tight">{item.name}</span>
-                  <span className="shrink-0 rounded-full bg-plantain px-4 py-1.5 text-2xl font-extrabold tabular-nums text-ink">{formatGhs(item.base_price)}</span>
+                  <span className="shrink-0 rounded-full bg-plantain px-4 py-1.5 text-2xl font-extrabold tabular-nums text-ink">{formatMoney(item.base_price)}</span>
                 </div>
               </div>
             ))}
@@ -138,7 +139,7 @@ export default function WelcomeScreen() {
                 <li key={item.id} className="py-8 animate-[rise_600ms_cubic-bezier(0.22,1,0.36,1)_both]" style={{ animationDelay: `${250 + i * 120}ms` }}>
                   <div className="flex items-baseline justify-between gap-6">
                     <span className="text-4xl font-bold leading-tight tracking-tight">{item.name}</span>
-                    <span className="shrink-0 rounded-full bg-palm px-4 py-1 text-2xl font-bold tabular-nums text-white">{formatGhs(item.base_price)}</span>
+                    <span className="shrink-0 rounded-full bg-palm px-4 py-1 text-2xl font-bold tabular-nums text-white">{formatMoney(item.base_price)}</span>
                   </div>
                   <p className="mt-3 max-w-[44ch] text-xl text-ink-muted">{item.description}</p>
                 </li>

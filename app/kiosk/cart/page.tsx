@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { lineTotal } from "@/lib/kiosk/cart";
 import { useKiosk } from "@/lib/kiosk/kiosk-session";
-import { formatGhs } from "@/lib/money";
+import { formatMoney } from "@/lib/money";
 import { FoodImage } from "../_components/food-image";
 import { KioskHeader } from "../_components/kiosk-header";
 import { orderTypeLabel } from "../_components/order-panel";
@@ -55,7 +55,7 @@ export default function CartScreen() {
                         {line.optionSummary.map((o) => (
                           <li key={`${o.groupName}-${o.optionName}`} className="flex gap-3">
                             <span>{o.optionName}</span>
-                            {o.priceDelta !== 0 ? <span className="tabular-nums">+ {formatGhs(o.priceDelta)}</span> : null}
+                            {o.priceDelta !== 0 ? <span className="tabular-nums">+ {formatMoney(o.priceDelta)}</span> : null}
                           </li>
                         ))}
                       </ul>
@@ -74,9 +74,9 @@ export default function CartScreen() {
                     label={`${line.name} quantity`}
                   />
                   <div className="w-[11.25rem] shrink-0 text-right">
-                    <span className="text-2xl font-extrabold tabular-nums">{formatGhs(lineTotal(line))}</span>
+                    <span className="text-2xl font-extrabold tabular-nums">{formatMoney(lineTotal(line))}</span>
                     {line.quantity > 1 ? (
-                      <span className="mt-1 block text-lg tabular-nums text-ink-muted">{formatGhs(line.unitPrice)} each</span>
+                      <span className="mt-1 block text-lg tabular-nums text-ink-muted">{formatMoney(line.unitPrice)} each</span>
                     ) : null}
                   </div>
                 </li>

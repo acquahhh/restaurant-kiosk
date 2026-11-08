@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { PaymentStep } from "@/lib/kiosk/order-input";
 import { formatPhone } from "@/lib/kiosk/phone";
-import { formatGhs } from "@/lib/money";
+import { formatMoney } from "@/lib/money";
 import { checkPayment, submitOtp } from "../actions";
 import { NumberPad } from "./keyboard";
 import { Button, Dialog } from "./ui";
@@ -142,7 +142,7 @@ export function PaymentPanel({
 
         <aside className="flex flex-col bg-sand p-10">
           <p className="text-lg text-ink-muted">Amount</p>
-          <p className="price mt-1">{formatGhs(amount)}</p>
+          <p className="price mt-1">{formatMoney(amount)}</p>
           {method === "mobile_money" ? (
             <>
               <p className="mt-6 text-lg text-ink-muted">From</p>

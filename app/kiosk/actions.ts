@@ -5,6 +5,7 @@ import { isServerWriteConfigured } from "@/lib/supabase/config";
 import { placeOrderSchema, type PaymentStep, type PlaceOrderResult } from "@/lib/kiosk/order-input";
 import { startPaystackPayment, submitPaymentOtp, verifyAndRecord } from "@/lib/kiosk/payments";
 import { isPaystackConfigured } from "@/lib/paystack";
+import { COUNTRY } from "@/lib/countries";
 import { LIMITS, allow, clientAddress } from "@/lib/server/rate-limit";
 
 /** Turns database error codes from place_order() into words for customers. */
@@ -62,7 +63,9 @@ export async function placeOrder(raw: unknown): Promise<PlaceOrderResult> {
     return { ok: false, code: "not_connected", message: "Ordering is not connected to the kitchen yet. This kiosk is in setup mode." };
   }
 
-  if (input.paymentMethod !== "cash" && !isPaystackConfigured()) {
+  const providerReady = input.paymentMethod === "mobile_money" ? COUNTRY.mobileMoney.ready && COUNTRY.mobileMoney.provider === "paystack"
+    : input.paymentMethod === "card" ? COUNTRY.card.ready && COUNTRY.card.provider === "paystack" : true;
+  if (input.paymentMethod !== "cash" && (!isPaystackConfigured() || !providerReady)) {
     return {
       ok: false,
       code: "payment_pending_setup",

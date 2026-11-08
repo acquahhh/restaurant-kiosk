@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { explainDbError, requireStaff, type ActionResult } from "@/lib/admin/auth";
-import { formatGhs } from "@/lib/money";
+import { formatMoney } from "@/lib/money";
 
 const uuid = z.string().uuid();
 
@@ -144,5 +144,5 @@ export async function updatePrice(id: string, basePrice: number): Promise<Action
   const { data, error } = await supabase.from("menu_items").update({ base_price: basePrice }).eq("id", id).select("name").single();
   if (error) return { ok: false, message: explainDbError(error.message) };
   refresh();
-  return { ok: true, message: `${data.name} is now ${formatGhs(basePrice)}.` };
+  return { ok: true, message: `${data.name} is now ${formatMoney(basePrice)}.` };
 }

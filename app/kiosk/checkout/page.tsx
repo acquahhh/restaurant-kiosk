@@ -5,8 +5,9 @@ import type { PaymentStep } from "@/lib/kiosk/order-input";
 import { useRouter } from "next/navigation";
 import { lineTotal } from "@/lib/kiosk/cart";
 import { useKiosk } from "@/lib/kiosk/kiosk-session";
-import { formatPhone, guessNetwork, isValidGhanaPhone, NETWORK_LABEL, type MomoNetwork } from "@/lib/kiosk/phone";
-import { formatGhs } from "@/lib/money";
+import { formatPhone, guessNetwork, isValidPhone, phoneLength, NETWORK_LABEL, type MomoNetwork } from "@/lib/kiosk/phone";
+import { COUNTRY } from "@/lib/countries";
+import { formatMoney } from "@/lib/money";
 import { placeOrder } from "../actions";
 import { KioskHeader } from "../_components/kiosk-header";
 import { NumberPad } from "../_components/keyboard";
@@ -18,7 +19,7 @@ import { Button, CheckIcon } from "../_components/ui";
 type Method = "mobile_money" | "card" | "cash";
 
 const METHOD_TEXT: Record<Method, { title: string; hint: string }> = {
-  mobile_money: { title: "Mobile Money", hint: "MTN MoMo, Telecel Cash or AT Money. Approve the prompt on your phone." },
+  mobile_money: { title: "Mobile Money", hint: `${COUNTRY.mobileMoney.networks.map((n) => n.label).join(", ").replace(/, ([^,]*)$/, " or $1")}. Approve the prompt on your phone.` },
   card: { title: "Card", hint: "Scan a code with your phone and pay by card on your own screen." },
   cash: { title: "Pay at the counter", hint: "Pay with cash when you collect your order." },
 };
@@ -31,8 +32,8 @@ export default function CheckoutScreen() {
 
   const methods = (
     [
-      settings.accept_mobile_money && "mobile_money",
-      settings.accept_card && "card",
+      settings.accept_mobile_money && COUNTRY.mobileMoney.ready && "mobile_money",
+      settings.accept_card && COUNTRY.card.ready && "card",
       settings.accept_cash && "cash",
     ] as const
   ).filter(Boolean) as Method[];
@@ -57,12 +58,12 @@ export default function CheckoutScreen() {
     if (!networkTouched) setNetwork(guessNetwork(momoPhone));
   }, [momoPhone, networkTouched]);
 
-  const momoReady = isValidGhanaPhone(momoPhone) && network !== null;
+  const momoReady = isValidPhone(momoPhone) && network !== null;
   const canPay = !pending && method !== null && (method !== "mobile_money" || momoReady) && Boolean(state.idempotencyKey);
 
   const payLabel =
-    method === "mobile_money" ? `Pay ${formatGhs(totals.total)}`
-    : method === "card" ? `Pay ${formatGhs(totals.total)} by card`
+    method === "mobile_money" ? `Pay ${formatMoney(totals.total)}`
+    : method === "card" ? `Pay ${formatMoney(totals.total)} by card`
     : method === "cash" ? "Place order"
     : "Choose how to pay";
 
@@ -170,9 +171,9 @@ export default function CheckoutScreen() {
                     aria-describedby="momo-help"
                   />
                 </label>
-                <p id="momo-help" className={`mt-2 text-lg ${momoPhone.length === 10 && !isValidGhanaPhone(momoPhone) ? "font-semibold text-pepper" : "text-ink-muted"}`}>
-                  {momoPhone.length === 10 && !isValidGhanaPhone(momoPhone)
-                    ? "That number is not a Ghana mobile number."
+                <p id="momo-help" className={`mt-2 text-lg ${momoPhone.length === phoneLength() && !isValidPhone(momoPhone) ? "font-semibold text-pepper" : "text-ink-muted"}`}>
+                  {momoPhone.length === phoneLength() && !isValidPhone(momoPhone)
+                    ? `That is not a ${COUNTRY.name} mobile number.`
                     : "The phone that will receive the payment prompt."}
                 </p>
 
@@ -197,7 +198,7 @@ export default function CheckoutScreen() {
                 </div>
               </div>
               <NumberPad
-                onKey={(d) => setMomoPhone((p) => (p.length < 10 ? p + d : p))}
+                onKey={(d) => setMomoPhone((p) => (p.length < phoneLength() ? p + d : p))}
                 onBackspace={() => setMomoPhone((p) => p.slice(0, -1))}
               />
             </section>
@@ -226,7 +227,7 @@ export default function CheckoutScreen() {
                   <span className="font-semibold tabular-nums">{l.quantity} × </span>
                   {l.name}
                 </span>
-                <span className="shrink-0 tabular-nums">{formatGhs(lineTotal(l))}</span>
+                <span className="shrink-0 tabular-nums">{formatMoney(lineTotal(l))}</span>
               </li>
             ))}
           </ul>
@@ -250,7 +251,7 @@ export default function CheckoutScreen() {
           amount={totals.total}
           method={payment.method}
           phone={momoPhone}
-          networkLabel={network ? NETWORK_LABEL[network] : "Mobile Money"}
+          networkLabel={(network && NETWORK_LABEL[network]) || "Mobile Money"}
           onPaid={onPaid}
           onRetry={() => {
             setPayment(null);

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { requireStaff } from "@/lib/admin/auth";
-import { formatGhs } from "@/lib/money";
+import { formatTime, localDate } from "@/lib/time";
+import { formatMoney } from "@/lib/money";
 import type { OrderStatus } from "@/lib/db/database.types";
 import { Badge, PageHeader, STATUS_LABEL, btnSecondary, input } from "../ui";
 
@@ -15,7 +16,7 @@ export default async function OrdersPage({
   const { supabase } = await requireStaff();
   const sp = await searchParams;
   const page = Math.max(1, Number(sp.page) || 1);
-  const today = new Date().toISOString().slice(0, 10);
+  const today = localDate();
   const from = /^\d{4}-\d{2}-\d{2}$/.test(sp.from ?? "") ? sp.from! : today;
   const to = /^\d{4}-\d{2}-\d{2}$/.test(sp.to ?? "") ? sp.to! : today;
 
@@ -85,14 +86,14 @@ export default async function OrdersPage({
                     <Link href={`/admin/orders/${o.id}`} prefetch={false} className="font-bold text-palm underline-offset-2 hover:underline">{o.order_number}</Link>
                     {from !== to ? <span className="ml-2 text-sm text-ink-muted">{o.order_date}</span> : null}
                   </td>
-                  <td className="px-4 py-3 tabular-nums">{new Date(o.placed_at).toLocaleTimeString("en-GH", { hour: "2-digit", minute: "2-digit", timeZone: "Africa/Accra" })}</td>
+                  <td className="px-4 py-3 tabular-nums">{formatTime(o.placed_at)}</td>
                   <td className="px-4 py-3">{o.order_type === "dine_in" ? `Table ${o.table_number}` : `Takeaway: ${o.customer_name}`}</td>
                   <td className="px-4 py-3"><Badge tone={STATUS_LABEL[o.status]!.tone}>{STATUS_LABEL[o.status]!.label}</Badge></td>
                   <td className="px-4 py-3">
                     {o.payment_status === "paid" ? <Badge tone="green">Paid</Badge> : <Badge tone="red">Unpaid</Badge>}
                     <span className="ml-2 text-sm text-ink-muted">{o.payment_method === "cash" ? "Cash" : o.payment_method === "mobile_money" ? "MoMo" : o.payment_method === "card" ? "Card" : ""}</span>
                   </td>
-                  <td className="px-4 py-3 text-right font-semibold tabular-nums">{formatGhs(o.total)}</td>
+                  <td className="px-4 py-3 text-right font-semibold tabular-nums">{formatMoney(o.total)}</td>
                 </tr>
               ))}
             </tbody>

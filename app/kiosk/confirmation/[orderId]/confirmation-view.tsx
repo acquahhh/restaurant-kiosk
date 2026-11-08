@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useKiosk } from "@/lib/kiosk/kiosk-session";
-import { formatGhs } from "@/lib/money";
+import { formatMoney } from "@/lib/money";
 import { Button } from "../../_components/ui";
 
 export interface ConfirmedOrder {
@@ -86,9 +86,9 @@ export function ConfirmationView({ order }: { order: ConfirmedOrder }) {
             <dt className="text-ink-muted">Payment</dt>
             <dd className={`mt-1 text-2xl font-bold ${unpaidCash ? "text-pepper" : ""}`}>
               {unpaidCash
-                ? `Not paid yet. Pay ${formatGhs(order.total)} at the counter with number ${order.order_number}.`
+                ? `Not paid yet. Pay ${formatMoney(order.total)} at the counter with number ${order.order_number}.`
                 : order.payment_status === "paid"
-                  ? `Paid, ${formatGhs(order.total)}`
+                  ? `Paid, ${formatMoney(order.total)}`
                   : "Waiting for payment"}
             </dd>
           </div>
@@ -106,14 +106,14 @@ export function ConfirmationView({ order }: { order: ConfirmedOrder }) {
                   </span>
                 ) : null}
               </span>
-              <span className="shrink-0 tabular-nums">{formatGhs(i.lineTotal)}</span>
+              <span className="shrink-0 tabular-nums">{formatMoney(i.lineTotal)}</span>
             </li>
           ))}
         </ul>
 
         <div className="flex items-baseline justify-between pt-6">
           <span className="text-2xl font-semibold">Total</span>
-          <span className="price">{formatGhs(order.total)}</span>
+          <span className="price">{formatMoney(order.total)}</span>
         </div>
 
         <div className="mt-8 flex items-center gap-6">

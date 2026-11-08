@@ -1,5 +1,10 @@
 import { z } from "zod";
 import { MAX_INSTRUCTIONS_LENGTH, MAX_QUANTITY_PER_LINE } from "./cart";
+import { COUNTRY } from "@/lib/countries";
+import { networkIds } from "./phone";
+
+/** Empty, or a local mobile number in the installation's country. */
+const localPhone = z.string().refine((p) => p === "" || COUNTRY.phone.pattern.test(p), "Enter a valid mobile number.");
 
 /**
  * What the kiosk sends to the server. It carries ids and choices only, never
@@ -11,10 +16,10 @@ export const placeOrderSchema = z
     orderType: z.enum(["dine_in", "takeaway"]),
     tableNumber: z.string().max(8).nullable(),
     customerName: z.string().trim().max(30),
-    customerPhone: z.string().regex(/^(0[235]\d{8})?$/),
+    customerPhone: localPhone,
     paymentMethod: z.enum(["mobile_money", "card", "cash"]),
-    momoNetwork: z.enum(["mtn", "telecel", "airteltigo"]).nullable(),
-    momoPhone: z.string().regex(/^(0[235]\d{8})?$/),
+    momoNetwork: z.string().refine((n) => networkIds().includes(n), "Choose a network.").nullable(),
+    momoPhone: localPhone,
     lines: z
       .array(
         z.object({

@@ -27,3 +27,24 @@ test("computes order totals", () => {
   assert.equal(t.serviceCharge, 450);
   assert.equal(t.total, 10575);
 });
+
+import { COUNTRIES } from "./countries";
+import { formatMoney, parseMoney, toInputText } from "./money";
+
+test("Rwanda: whole francs with thousands separators", () => {
+  assert.equal(formatMoney(3500, COUNTRIES.RW), "RWF 3,500");
+  assert.equal(formatMoney(125000, COUNTRIES.RW), "RWF 125,000");
+  assert.equal(parseMoney("3,500", COUNTRIES.RW), 3500);
+  assert.equal(toInputText(3500, COUNTRIES.RW), "3500");
+  assert.throws(() => parseMoney("3500.50", COUNTRIES.RW)); // francs have no cents
+});
+
+test("Kenya: shillings and cents", () => {
+  assert.equal(formatMoney(45000, COUNTRIES.KE), "KSh 450.00");
+  assert.equal(parseMoney("450.5", COUNTRIES.KE), 45050);
+});
+
+test("Ghana stays as before", () => {
+  assert.equal(formatMoney(7500, COUNTRIES.GH), "GH₵ 75.00");
+  assert.equal(toInputText(7550, COUNTRIES.GH), "75.50");
+});

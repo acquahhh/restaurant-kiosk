@@ -3,7 +3,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { OrderStatus } from "@/lib/db/database.types";
-import { formatGhs } from "@/lib/money";
+import { formatMoney } from "@/lib/money";
+import { formatTime } from "@/lib/time";
 import { signOut } from "../login/actions";
 import { announceReady, autoUnlock, chime, isAnnouncerUnlocked, onUnlockChange } from "@/lib/client/announcer";
 
@@ -251,7 +252,7 @@ export function KitchenBoard({
                         <span className={`${compact ? "text-xl" : "text-4xl"} font-extrabold tabular-nums tracking-tight`}>{order.order_number}</span>
                         <span className={`rounded-full px-2.5 py-0.5 text-sm font-semibold tabular-nums ${late ? "bg-[#ff8a80]/15 text-[#ff8a80]" : slow ? "bg-status-new/15 text-status-new" : "bg-white/5 text-white/60"}`}>
                           {compact
-                            ? new Date(order.completed_at ?? order.placed_at).toLocaleTimeString("en-GH", { hour: "2-digit", minute: "2-digit" })
+                            ? formatTime(order.completed_at ?? order.placed_at)
                             : `${minutesSince(since, now)} min${lane.status === "received" ? "" : ` in ${lane.title.toLowerCase()}`}`}
                         </span>
                       </div>
@@ -282,7 +283,7 @@ export function KitchenBoard({
                           {unpaid ? (
                             <div className="mt-3 flex items-center justify-between gap-3 rounded bg-white/5 px-3 py-2">
                               <span className="text-sm font-semibold text-[#ff8a80]">
-                                {order.payment_method === "cash" ? `Unpaid, cash ${formatGhs(order.total)}` : "Payment not confirmed"}
+                                {order.payment_method === "cash" ? `Unpaid, cash ${formatMoney(order.total)}` : "Payment not confirmed"}
                               </span>
                               {order.payment_method === "cash" ? (
                                 <button

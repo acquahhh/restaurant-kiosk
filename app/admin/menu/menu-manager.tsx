@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useOptimistic, useState, useTransition } from "react";
-import { formatGhs, parseGhs } from "@/lib/money";
+import { formatMoney, parseMoney, toInputText } from "@/lib/money";
+import { COUNTRY } from "@/lib/countries";
 import { createCategory, deleteCategory, moveCategory, toggleItem, updateCategory, updatePrice } from "./actions";
 import { btnSecondary, input } from "../ui";
 
@@ -36,18 +37,18 @@ function PriceCell({ id, name, price, onSave }: { id: string; name: string; pric
     return (
       <button
         type="button"
-        onClick={() => { setText((price / 100).toFixed(2)); setBad(false); setEditing(true); }}
+        onClick={() => { setText(toInputText(price)); setBad(false); setEditing(true); }}
         className="rounded-md border border-transparent px-2 py-1 font-semibold tabular-nums hover:border-sand-deep hover:bg-canvas"
-        aria-label={`Change price of ${name}, now ${formatGhs(price)}`}
+        aria-label={`Change price of ${name}, now ${formatMoney(price)}`}
         title="Click to change the price"
       >
-        {formatGhs(price)}
+        {formatMoney(price)}
       </button>
     );
   }
   const submit = async () => {
     let p: number;
-    try { p = parseGhs(text); } catch { setBad(true); return; }
+    try { p = parseMoney(text); } catch { setBad(true); return; }
     if (p === price) { setEditing(false); return; }
     setSaving(true);
     const ok = await onSave(id, p);
@@ -56,7 +57,7 @@ function PriceCell({ id, name, price, onSave }: { id: string; name: string; pric
   };
   return (
     <form className="flex items-center justify-end gap-1" onSubmit={(e) => { e.preventDefault(); void submit(); }}>
-      <span className="text-sm text-ink-muted">GH₵</span>
+      <span className="text-sm text-ink-muted">{COUNTRY.currency.symbol}</span>
       <input
         autoFocus
         inputMode="decimal"

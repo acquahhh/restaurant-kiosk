@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useKiosk, type OrderType } from "@/lib/kiosk/kiosk-session";
-import { formatPhone, isValidGhanaPhone } from "@/lib/kiosk/phone";
+import { formatPhone, isValidPhone, phoneLength } from "@/lib/kiosk/phone";
+import { COUNTRY } from "@/lib/countries";
 import { KioskHeader } from "../_components/kiosk-header";
 import { LetterKeyboard, NumberPad, tidyName } from "../_components/keyboard";
 import { Button, CheckIcon } from "../_components/ui";
@@ -23,7 +24,7 @@ export default function OrderTypeScreen() {
   const [showErrors, setShowErrors] = useState(false);
 
   const nameOk = name.trim().length >= 2;
-  const phoneOk = phone === "" || isValidGhanaPhone(phone);
+  const phoneOk = phone === "" || isValidPhone(phone);
   const canContinue = type === "dine_in" ? table !== null : type === "takeaway" ? nameOk && phoneOk : false;
 
   function proceed() {
@@ -136,8 +137,8 @@ export default function OrderTypeScreen() {
                       field === "phone" ? "border-palm" : "border-sand-deep"
                     }`}
                   />
-                  {!phoneOk && (showErrors || phone.length >= 10) ? (
-                    <span className="mt-2 block text-lg font-semibold text-pepper">Enter a 10-digit number, like 024 123 4567.</span>
+                  {!phoneOk && (showErrors || phone.length >= phoneLength()) ? (
+                    <span className="mt-2 block text-lg font-semibold text-pepper">Enter a mobile number like {COUNTRY.phone.example}.</span>
                   ) : null}
                 </label>
               </div>
@@ -154,7 +155,7 @@ export default function OrderTypeScreen() {
                   />
                 ) : (
                   <NumberPad
-                    onKey={(d) => setPhone((p) => (p.length < 10 ? p + d : p))}
+                    onKey={(d) => setPhone((p) => (p.length < phoneLength() ? p + d : p))}
                     onBackspace={() => setPhone((p) => p.slice(0, -1))}
                   />
                 )}

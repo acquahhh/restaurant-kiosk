@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireStaff } from "@/lib/admin/auth";
-import { formatGhs } from "@/lib/money";
+import { formatDateTime } from "@/lib/time";
+import { formatMoney } from "@/lib/money";
 import { Badge, PageHeader, STATUS_LABEL } from "../../ui";
 import { OrderActions } from "./order-actions";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-const time = (iso: string) => new Date(iso).toLocaleString("en-GH", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", timeZone: "Africa/Accra" });
+const time = (iso: string) => formatDateTime(iso);
 
 export default async function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -55,14 +56,14 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
                   <p className="font-semibold">{i.quantity} × {i.item_name}</p>
                   {(customizations ?? []).filter((c) => c.order_item_id === i.id).map((c) => (
                     <p key={c.option_name + c.group_name} className="text-sm text-ink-muted">
-                      {c.group_name}: {c.option_name}{c.price_delta ? ` (+${formatGhs(c.price_delta)})` : ""}
+                      {c.group_name}: {c.option_name}{c.price_delta ? ` (+${formatMoney(c.price_delta)})` : ""}
                     </p>
                   ))}
                   {i.special_instructions ? <p className="text-sm italic text-ink-muted">Note: {i.special_instructions}</p> : null}
                 </div>
                 <div className="text-right tabular-nums">
-                  <p className="font-semibold">{formatGhs(i.line_total)}</p>
-                  {i.quantity > 1 ? <p className="text-sm text-ink-muted">{formatGhs(i.unit_price)} each</p> : null}
+                  <p className="font-semibold">{formatMoney(i.line_total)}</p>
+                  {i.quantity > 1 ? <p className="text-sm text-ink-muted">{formatMoney(i.unit_price)} each</p> : null}
                 </div>
               </li>
             ))}
@@ -70,12 +71,12 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
           <dl className="mt-3 space-y-1 border-t border-sand-deep pt-3 tabular-nums">
             {order.tax_amount || order.service_charge ? (
               <>
-                <div className="flex justify-between"><dt>Subtotal</dt><dd>{formatGhs(order.subtotal)}</dd></div>
-                {order.tax_amount ? <div className="flex justify-between text-ink-muted"><dt>Tax</dt><dd>{formatGhs(order.tax_amount)}</dd></div> : null}
-                {order.service_charge ? <div className="flex justify-between text-ink-muted"><dt>Service charge</dt><dd>{formatGhs(order.service_charge)}</dd></div> : null}
+                <div className="flex justify-between"><dt>Subtotal</dt><dd>{formatMoney(order.subtotal)}</dd></div>
+                {order.tax_amount ? <div className="flex justify-between text-ink-muted"><dt>Tax</dt><dd>{formatMoney(order.tax_amount)}</dd></div> : null}
+                {order.service_charge ? <div className="flex justify-between text-ink-muted"><dt>Service charge</dt><dd>{formatMoney(order.service_charge)}</dd></div> : null}
               </>
             ) : null}
-            <div className="flex justify-between text-lg font-bold"><dt>Total</dt><dd>{formatGhs(order.total)}</dd></div>
+            <div className="flex justify-between text-lg font-bold"><dt>Total</dt><dd>{formatMoney(order.total)}</dd></div>
           </dl>
         </section>
 
@@ -109,7 +110,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
                         <span className="mt-1 block font-semibold text-pepper">Paystack reported a different amount. Check this payment in Paystack.</span>
                       ) : null}
                     </span>
-                    <span className="tabular-nums">{formatGhs(p.amount)}</span>
+                    <span className="tabular-nums">{formatMoney(p.amount)}</span>
                   </li>
                 ))}
               </ul>
