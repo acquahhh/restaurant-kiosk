@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { LIMITS, allow, clientAddress } from "@/lib/server/rate-limit";
 
 export interface SignInState {
   error: string | null;
@@ -19,6 +20,12 @@ export async function signIn(_prev: SignInState, formData: FormData): Promise<Si
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
   if (!email || !password) return { error: "Enter your email and password.", email };
+
+  const device = await clientAddress();
+  if (!allow(`signin:${device}`, LIMITS.signInPerDevice.limit, LIMITS.signInPerDevice.windowMs)) {
+    console.warn("[security] sign-in rate limit reached for", device);
+    return { error: "Too many sign-in attempts from this device. Wait 10 minutes and try again.", email };
+  }
 
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });

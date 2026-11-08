@@ -3,7 +3,7 @@
 Self-service kiosk, kitchen display and admin dashboard for a restaurant in Ghana.
 Next.js 15 · TypeScript · Tailwind v4 · Supabase · Paystack.
 
-See `docs/PHASE-1-ARCHITECTURE.md` for the architecture, data model and design direction, `docs/SETUP-SUPABASE.md` to connect the database, `docs/LOCAL-SERVER-SETUP.md` to run it inside the restaurant (not on the internet), and `docs/KIOSK-DEVICE-SETUP.md` for the screens.
+See `docs/PHASE-1-ARCHITECTURE.md` for the architecture, data model and design direction, `docs/SETUP-SUPABASE.md` to connect the database, `docs/LOCAL-SERVER-SETUP.md` to run it inside the restaurant (not on the internet), `docs/KIOSK-DEVICE-SETUP.md` for the screens, and `docs/SECURITY.md` for the security review and owner checklist.
 
 Without Supabase keys, `npm run dev` runs the kiosk on a built-in development menu (a badge says so) and ordering is disabled.
 

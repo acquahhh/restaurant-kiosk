@@ -14,8 +14,10 @@ In the dashboard open **SQL Editor** → **New query**. Run these three files fr
 4. `supabase/migrations/0003_kitchen.sql`
 5. `supabase/migrations/0004_admin.sql`
 6. `supabase/migrations/0006_payments.sql`
+7. `supabase/migrations/0007_board_order_type.sql`
+8. `supabase/migrations/0008_hardening.sql`
 
-Later migrations are always run in number order, once each.
+Later migrations are always run in number order. Each one is safe to run again.
 
 Each should end with "Success. No rows returned". Run each file once only.
 

@@ -5,6 +5,7 @@ import { isServerWriteConfigured } from "@/lib/supabase/config";
 import { placeOrderSchema, type PaymentStep, type PlaceOrderResult } from "@/lib/kiosk/order-input";
 import { startPaystackPayment, submitPaymentOtp, verifyAndRecord } from "@/lib/kiosk/payments";
 import { isPaystackConfigured } from "@/lib/paystack";
+import { LIMITS, allow, clientAddress } from "@/lib/server/rate-limit";
 
 /** Turns database error codes from place_order() into words for customers. */
 type FailureCode = Extract<PlaceOrderResult, { ok: false }>["code"];
@@ -49,6 +50,13 @@ export async function placeOrder(raw: unknown): Promise<PlaceOrderResult> {
     return { ok: false, code: "invalid", message: parsed.error.issues[0]?.message ?? "Some order details are missing." };
   }
   const input = parsed.data;
+
+  const device = await clientAddress();
+  if (!allow(`order:${device}`, LIMITS.placeOrderPerDevice.limit, LIMITS.placeOrderPerDevice.windowMs) ||
+      !allow("order:all", LIMITS.placeOrderTotal.limit, LIMITS.placeOrderTotal.windowMs)) {
+    console.warn("[security] order rate limit reached for", device);
+    return { ok: false, code: "invalid", message: "Too many orders from this screen just now. Please wait a minute and try again." };
+  }
 
   if (!isServerWriteConfigured()) {
     return { ok: false, code: "not_connected", message: "Ordering is not connected to the kitchen yet. This kiosk is in setup mode." };
@@ -105,6 +113,10 @@ const REF_RE = /^ORD-\d{6}-\d{3,}-[0-9a-f]{8,10}$/;
 /** Polled by the kiosk while a customer pays. */
 export async function checkPayment(reference: string) {
   if (!REF_RE.test(reference)) return { status: "failed" as const, message: "Unknown payment." };
+  const device = await clientAddress();
+  if (!allow(`check:${device}`, LIMITS.checkPaymentPerDevice.limit, LIMITS.checkPaymentPerDevice.windowMs)) {
+    return { status: "pending" as const }; // slow down; the kiosk simply keeps waiting
+  }
   try {
     return await verifyAndRecord(reference);
   } catch (e) {
@@ -115,6 +127,9 @@ export async function checkPayment(reference: string) {
 
 /** Telecel Cash: the customer types the voucher code from *110#. */
 export async function submitOtp(reference: string, otp: string): Promise<PaymentStep> {
-  if (!REF_RE.test(reference) || !/^\d{4,8}$/.test(otp)) return { stage: "otp", reference, message: "Enter the code exactly as it appears on your phone." };
+  if (!REF_RE.test(reference) || !/^\d{4,8}$/.test(otp)) return { stage: "otp", reference, message: "", error: "Enter the code exactly as it appears on your phone." };
+  if (!allow(`otp:${reference}`, LIMITS.otpPerPayment.limit, LIMITS.otpPerPayment.windowMs)) {
+    return { stage: "failed", message: "Too many codes tried for this payment. Please choose Try again for a new payment request." };
+  }
   return submitPaymentOtp(reference, otp);
 }
