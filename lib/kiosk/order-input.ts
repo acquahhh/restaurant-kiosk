@@ -42,7 +42,7 @@ export type PlaceOrderInput = z.infer<typeof placeOrderSchema>;
 export type PaymentStep =
   | { stage: "paid" }
   | { stage: "approve"; reference: string; message: string }   // Mobile Money: approve on the phone
-  | { stage: "otp"; reference: string; message: string }       // Telecel: enter the voucher code
+  | { stage: "otp"; reference: string; message: string; error?: string } // enter the code from the phone
   | { stage: "qr"; reference: string; qrSvg: string }          // Card: scan and pay on own phone
   | { stage: "failed"; message: string };
 

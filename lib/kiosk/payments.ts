@@ -137,7 +137,9 @@ export async function submitPaymentOtp(reference: string, otp: string): Promise<
   try {
     const res = await paystackSubmitOtp(reference, otp);
     trace(reference, res.status ? `code accepted: Paystack says "${res.data.status}"` : `code refused: "${res.message}"`);
-    if (!res.status) return { stage: "otp", reference, message: friendlyFailure(res.message ?? "otp") };
+    // A refused code keeps the customer on the code screen; the panel keeps
+    // Paystack's original instruction and shows this as an error beneath it.
+    if (!res.status) return { stage: "otp", reference, message: "", error: "That code was not accepted. Check it and try again." };
     return stepFromCharge(reference, res.data, "telecel");
   } catch {
     return { stage: "failed", message: "We could not reach the payment service. Check the connection and try again." };

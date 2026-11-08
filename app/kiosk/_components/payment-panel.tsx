@@ -71,7 +71,9 @@ export function PaymentPanel({
     const next = await submitOtp(step.reference, otp);
     setBusy(false);
     setOtp("");
-    setStep(next);
+    // Wrong code: keep Paystack's instruction, add the error under it.
+    if (next.stage === "otp" && next.error) setStep({ ...step, error: next.error });
+    else setStep(next);
   }
 
   const heading =
@@ -103,6 +105,7 @@ export function PaymentPanel({
             <div className="mt-6 flex gap-10">
               <div className="max-w-[30ch]">
                 <p className="text-xl leading-snug">{step.message}</p>
+                {step.error ? <p role="alert" className="mt-3 text-lg font-semibold text-pepper">{step.error}</p> : null}
                 <output className="mt-6 block h-touch-lg w-[280px] rounded-button border-[3px] border-palm px-5 text-4xl font-bold leading-[82px] tracking-[0.3em] tabular-nums">
                   {otp}
                 </output>
