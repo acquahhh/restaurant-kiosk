@@ -35,6 +35,19 @@ https
     req.headers["x-forwarded-proto"] = "https";
     handle(req, res);
   })
+  .on("error", (e) => {
+    if (e.code === "EADDRINUSE") {
+      console.error(`\nPort ${httpsPort} is already in use: another copy of the server is probably still running`);
+      console.error("(an old window, or one started before the last build). Stop every copy, then start once:");
+      console.error("  Get-Process node | Stop-Process -Force");
+      console.error("  npm run serve:https\n");
+    } else if (e.code === "EACCES") {
+      console.error(`\nNot allowed to use port ${httpsPort}. Use another port:  $env:HTTPS_PORT=8443; npm run serve:https\n`);
+    } else {
+      console.error("HTTPS server failed to start:", e);
+    }
+    process.exit(1);
+  })
   .listen(httpsPort, "0.0.0.0", () => console.log(`HTTPS: https://<this PC>${httpsPort === 443 ? "" : ":" + httpsPort}/kiosk`));
 
 for (const port of redirectPorts) {
