@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { useOptimistic, useState, useTransition } from "react";
-import { formatGhs } from "@/lib/money";
-import { createCategory, deleteCategory, moveCategory, toggleItem, updateCategory } from "./actions";
+import { formatGhs, parseGhs } from "@/lib/money";
+import { createCategory, deleteCategory, moveCategory, toggleItem, updateCategory, updatePrice } from "./actions";
 import { btnSecondary, input } from "../ui";
 
 type Category = { id: string; name: string; slug: string; is_active: boolean; sort_order: number };
@@ -26,6 +26,55 @@ function Switch({ on, label, onChange, disabled }: { on: boolean; label: string;
   );
 }
 
+/** Click the price, type a new one, press Enter. Escape cancels. */
+function PriceCell({ id, name, price, onSave }: { id: string; name: string; price: number; onSave: (id: string, p: number) => Promise<boolean> }) {
+  const [editing, setEditing] = useState(false);
+  const [text, setText] = useState("");
+  const [bad, setBad] = useState(false);
+  const [saving, setSaving] = useState(false);
+  if (!editing) {
+    return (
+      <button
+        type="button"
+        onClick={() => { setText((price / 100).toFixed(2)); setBad(false); setEditing(true); }}
+        className="rounded-md border border-transparent px-2 py-1 font-semibold tabular-nums hover:border-sand-deep hover:bg-canvas"
+        aria-label={`Change price of ${name}, now ${formatGhs(price)}`}
+        title="Click to change the price"
+      >
+        {formatGhs(price)}
+      </button>
+    );
+  }
+  const submit = async () => {
+    let p: number;
+    try { p = parseGhs(text); } catch { setBad(true); return; }
+    if (p === price) { setEditing(false); return; }
+    setSaving(true);
+    const ok = await onSave(id, p);
+    setSaving(false);
+    if (ok) setEditing(false);
+  };
+  return (
+    <form className="flex items-center justify-end gap-1" onSubmit={(e) => { e.preventDefault(); void submit(); }}>
+      <span className="text-sm text-ink-muted">GH₵</span>
+      <input
+        autoFocus
+        inputMode="decimal"
+        value={text}
+        disabled={saving}
+        onChange={(e) => { setText(e.target.value); setBad(false); }}
+        onKeyDown={(e) => e.key === "Escape" && setEditing(false)}
+        onFocus={(e) => e.target.select()}
+        aria-label={`New price for ${name}`}
+        aria-invalid={bad}
+        className={`h-9 w-24 rounded-md border px-2 text-right tabular-nums outline-none focus:ring-2 focus:ring-palm/20 ${bad ? "border-pepper" : "border-palm"}`}
+      />
+      <button type="submit" disabled={saving} className="h-9 rounded-md bg-palm px-3 text-sm font-semibold text-white disabled:opacity-50">{saving ? "Saving" : "Save"}</button>
+      <button type="button" onClick={() => setEditing(false)} className="h-9 rounded-md px-2 text-sm font-semibold text-ink-muted hover:bg-sand">Cancel</button>
+    </form>
+  );
+}
+
 export function MenuManager({ categories, items }: { categories: Category[]; items: Item[] }) {
   const [pending, start] = useTransition();
   const [notice, setNotice] = useState<{ ok: boolean; text: string } | null>(null);
@@ -40,6 +89,12 @@ export function MenuManager({ categories, items }: { categories: Category[]; ite
       const r = await fn();
       setNotice(r.message || !r.ok ? { ok: r.ok, text: r.message ?? "Something went wrong." } : null);
     });
+
+  const savePrice = async (id: string, p: number) => {
+    const r = await updatePrice(id, p);
+    setNotice({ ok: r.ok, text: r.message ?? (r.ok ? "Saved." : "Not saved.") });
+    return r.ok;
+  };
 
   const toggle = (id: string, field: Toggle, value: boolean) =>
     start(async () => {
@@ -103,14 +158,15 @@ export function MenuManager({ categories, items }: { categories: Category[]; ite
               <p className="px-4 py-3 text-sm text-ink-muted">No meals yet. Use Add meal and choose this category.</p>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full min-w-[640px] text-left">
+                <table className="w-full min-w-[820px] table-fixed text-left">
                   <thead className="text-sm text-ink-muted">
                     <tr>
                       <th className="px-4 py-2 font-semibold">Meal</th>
-                      <th className="px-4 py-2 text-right font-semibold">Price</th>
-                      <th className="px-4 py-2 text-center font-semibold">Available</th>
-                      <th className="px-4 py-2 text-center font-semibold">Popular</th>
-                      <th className="px-4 py-2 text-center font-semibold">Featured</th>
+                      <th className="w-[260px] px-4 py-2 text-right font-semibold">Price</th>
+                      <th className="w-[100px] px-4 py-2 text-center font-semibold">Available</th>
+                      <th className="w-[100px] px-4 py-2 text-center font-semibold">Popular</th>
+                      <th className="w-[100px] px-4 py-2 text-center font-semibold">Featured</th>
+                      <th className="w-[90px] px-4 py-2"><span className="sr-only">Edit</span></th>
                     </tr>
                   </thead>
                   <tbody>
@@ -127,10 +183,13 @@ export function MenuManager({ categories, items }: { categories: Category[]; ite
                             {item.name}
                           </Link>
                         </td>
-                        <td className="px-4 py-2.5 text-right tabular-nums">{formatGhs(item.base_price)}</td>
+                        <td className="px-4 py-2.5 text-right"><PriceCell id={item.id} name={item.name} price={item.base_price} onSave={savePrice} /></td>
                         <td className="px-4 py-2.5"><div className="flex justify-center"><Switch on={item.is_available} label={`${item.name} available`} onChange={(v) => toggle(item.id, "is_available", v)} /></div></td>
                         <td className="px-4 py-2.5"><div className="flex justify-center"><Switch on={item.is_popular} label={`${item.name} popular`} onChange={(v) => toggle(item.id, "is_popular", v)} /></div></td>
                         <td className="px-4 py-2.5"><div className="flex justify-center"><Switch on={item.is_featured} label={`${item.name} featured`} onChange={(v) => toggle(item.id, "is_featured", v)} /></div></td>
+                        <td className="px-4 py-2.5 text-right">
+                          <Link href={`/admin/menu/${item.id}`} className="inline-flex h-9 items-center rounded-md border border-sand-deep px-3 text-sm font-semibold hover:bg-sand">Edit</Link>
+                        </td>
                       </tr>
                     ))}
                   </tbody>

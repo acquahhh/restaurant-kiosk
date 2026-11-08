@@ -13,7 +13,7 @@ export default async function MenuPage() {
     <>
       <PageHeader
         title="Menu"
-        description="Changes reach the kiosk on its next screen load. Sold-out meals stay visible but cannot be ordered."
+        description="Click a price to change it. Use Edit for the name, photo, description and choices. Changes reach the kiosk on its next screen load."
         actions={<Link href="/admin/menu/new" className={btnPrimary}>Add meal</Link>}
       />
       <MenuManager categories={categories ?? []} items={items ?? []} />

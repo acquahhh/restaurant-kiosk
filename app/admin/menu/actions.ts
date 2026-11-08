@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { explainDbError, requireStaff, type ActionResult } from "@/lib/admin/auth";
+import { formatGhs } from "@/lib/money";
 
 const uuid = z.string().uuid();
 
@@ -129,4 +130,14 @@ export async function deleteCategory(id: string): Promise<ActionResult> {
   if (error) return { ok: false, message: explainDbError(error.message) };
   refresh();
   return { ok: true, message: "Category deleted." };
+}
+
+export async function updatePrice(id: string, basePrice: number): Promise<ActionResult> {
+  if (!uuid.safeParse(id).success) return { ok: false, message: "Unknown meal." };
+  if (!Number.isInteger(basePrice) || basePrice < 0 || basePrice > 10_000_000) return { ok: false, message: "Enter a valid price." };
+  const { supabase } = await requireStaff();
+  const { data, error } = await supabase.from("menu_items").update({ base_price: basePrice }).eq("id", id).select("name").single();
+  if (error) return { ok: false, message: explainDbError(error.message) };
+  refresh();
+  return { ok: true, message: `${data.name} is now ${formatGhs(basePrice)}.` };
 }
